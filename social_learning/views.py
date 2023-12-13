@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404, get_list_or_40
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import *
-from .hashed import hashed, create_wallet
+from .hashed import hashed, create_private_key, create_account
 from django.views import generic
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -42,10 +42,10 @@ def Login(request):
 
         user = authenticate(request, username=username, password=password)
         if user:
-            login(request, user)
-            return redirect("post")
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect("check")
         else:
-            return redirect("a_login")
+            return redirect("index")
 
 
 def Signup(request):
@@ -69,23 +69,59 @@ def Signup(request):
             user = User.objects.get(username=username)
             edu = Education_rank.objects.get(id=education_rank)
             if user and edu:
-                wallet = create_wallet()
+                key = create_private_key()
+                wallet = create_account(key)
                 passcode = hashed(passcode)
-                user2 = Bio(user=user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu, passcode=passcode,
-                            email=email, description=description, address=wallet, address_password=wallet.privateKey.hex(), wallet_passcode=wallet)
-                user2.save()
-                login(request, user)
-                return redirect("home")
+                bio = Bio(user=user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu,
+                          description=description, address=wallet, address_password=key, wallet_passcode=passcode)
+                bio.save()
+                login(request, user,
+                      backend='django.contrib.auth.backends.ModelBackend')
+                return redirect("check")
         else:
-            login(request, user)
-            return redirect("home")
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            return redirect("check")
+
+
+def check(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if bio:
+            return redirect('post')
+        else:
+            edu = Education_rank.objects.all()
+            context = {"educations": edu}
+            if request.method == "POST":
+                grade = request.POST.get("grade")
+                education_rank = request.POST.get("edu_rank")
+                description = request.POST.get("description")
+                avatar = request.FILES['avatar']
+                thumbnail = request.FILES['thumbnail']
+                passcode = request.POST.get("passcode")
+
+                edu = Education_rank.objects.get(id=education_rank)
+
+                key = create_private_key()
+                wallet = create_account(key)
+
+                passcode = hashed(passcode)
+                bio = Bio(user=request.user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu,
+                          description=description, address=wallet, address_password=key, wallet_passcode=passcode)
+                bio.save()
+                return redirect('post')
+    else:
+        return redirect('index')
+    return render(request, 'check.html', context)
 
 # index
 
 
 def index(request):
-    edu = Education_rank.objects.all()
-    context = {"educations": edu}
+    if request.user.is_authenticated:
+        return redirect('check')
+    else:
+        edu = Education_rank.objects.all()
+        context = {"educations": edu}
     return render(request, "index.html", context)
 
 # searched_list_view
@@ -98,7 +134,7 @@ def searched_question_list_view(request, q):
             description__icontain=q), grade__lte=user.grade).all()
         context = {"posts": post[::-1]}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "question/list.html", context)
 
 
@@ -109,7 +145,7 @@ def searched_gigs_list_view(request, q):
             description__icontain=q), grade__lte=user.grade, education_rank=user.edu_rank).all()
         context = {"posts": post[::-1]}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "gigs/list.html", context)
 
 
@@ -120,7 +156,7 @@ def searched_document_list_view(request, q):
             description__icontain=q), grade__lte=user.grade, edu_rank=user.edu_rank).all()
         context = {"posts": post[::-1]}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "document/list.html", context)
 
 
@@ -129,7 +165,7 @@ def searched_post_list_view(request, q):
         post = Post.objects.filter(Q(content__icontain=q)).all()
         context = {"posts": post[::-1]}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "document/list.html", context)
 
 
@@ -139,7 +175,7 @@ def searched_trade_list_view(request, q):
             Q(title__icontain=q) | Q(description__icontain=q)).all()
         context = {"posts": post[::-1]}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "trade/list_view.html", context)
 
 # list_view
@@ -149,7 +185,7 @@ def question_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'ether'))
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         edu_rank = Education_rank.objects.all()
         subject = Subject.objects.all()
@@ -158,7 +194,7 @@ def question_list_view(request):
         context = {"posts": post[::-1], 'teen': teen,
                    'subjects': subject, 'educations': edu_rank}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "question/list.html", context)
 
 
@@ -166,7 +202,7 @@ def gigs_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'ether'))
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         edu_rank = Education_rank.objects.all()
         subject = Subject.objects.all()
@@ -176,7 +212,7 @@ def gigs_list_view(request):
         context = {"posts": post[::-1], 'teen': teen,
                    'subjects': subject, 'educations': edu_rank, "bio": bio}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "gigs/list.html", context)
 
 
@@ -184,7 +220,7 @@ def document_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'ether'))
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         edu_rank = Education_rank.objects.all()
         subject = Subject.objects.all()
@@ -194,7 +230,7 @@ def document_list_view(request):
         context = {"posts": post[::-1], 'teen': teen,
                    'subjects': subject, 'educations': edu_rank}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "document/list.html", context)
 
 
@@ -206,9 +242,9 @@ def post_list_view(request):
             address).call()
         post = Post.objects.all()
         context = {"posts": post[::-1],
-                   'teen': float(web3.to_wei(teen, 'ether'))}
+                   'teen': float(web3.to_wei(teen, 'wei') / 1000000000000000000)}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "post/list.html", context)
 
 
@@ -216,13 +252,13 @@ def trade_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         teen = float(web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'ether'))
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         currency = payment_method.objects.all()
         post = Trade.objects.all()
         context = {"posts": post[::-1], 'teen': teen, 'currencies': currency}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "trade/list.html", context)
 
 # create_api
@@ -237,7 +273,7 @@ def post_create(request):
             sql.save()
             return redirect("post")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def document_create(request):
@@ -261,7 +297,7 @@ def document_create(request):
             sql.save()
             return redirect("document")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def gigs_create(request):
@@ -287,7 +323,7 @@ def gigs_create(request):
             sql.save()
             return redirect("gigs")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def question_create(request):
@@ -317,7 +353,7 @@ def question_create(request):
                                        subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0)
             return redirect("question_view", id=sql.id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def create_trade_offer(request):
@@ -359,7 +395,7 @@ def create_trade_offer(request):
             else:
                 return redirect("post")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # payment_api
 
@@ -391,8 +427,8 @@ def question_payment(request, id):
                     answer.choosen = 1
                     answer.save()
 
-                    tran = contract.functions.transfer(question.user.address, web3.to_wei(question.price, 'ether')).buildTransaction(
-                        {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
+                    tran = contract.functions.transfer(question.user.address, web3.to_wei(question.price, 'ether')).build_transaction(
+                        {'chainId': 11155111, 'gas': 21632, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
                     signed_txn = web3.eth.account.sign_transaction(
                         tran, real_password)
                     web3.eth.send_raw_transaction(signed_txn.rawTransaction)
@@ -400,7 +436,7 @@ def question_payment(request, id):
                 else:
                     return redirect("all_error")
             else:
-                return redirect("a_login")
+                return redirect("index")
 
 
 def document_payment(request, id):
@@ -424,7 +460,7 @@ def document_payment(request, id):
 
                     tran = contract.functions.transfer(str(document.user.address), web3.to_wei(int(document.price), 'ether')).build_transaction(
                         {'chainId': 11155111,
-                         'gas': 3000000,
+                         'gas': 2163200,
                          'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
                     signed_txn = web3.eth.account.sign_transaction(
                         tran, real_password)
@@ -441,12 +477,12 @@ def document_payment(request, id):
             else:
                 return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def gigs_payment(request, id):
     if request.user.is_authenticated:
-        gigs = Gigs.objects.filter(id=id).first()
+        gigs = join_cls.objects.filter(id=id).first()
         if request.method == "POST" and gigs:
             code = request.POST.get("code")
 
@@ -454,34 +490,37 @@ def gigs_payment(request, id):
             if final != "ValueError: The passcode just contain only number from 0 to 9":
                 bio = Bio.objects.filter(
                     wallet_passcode=final, user=request.user).first()
+
                 teen_balanced = float(web3.to_wei(
                     contract.functions.balanceOf(bio.address).call(), 'ether'))
-                check = join_cls.objects.get(
-                    user=bio, gig=gigs, status="Đang Học")
-                if final == bio.wallet_passcode and teen_balanced >= gigs.price and check:
-                    learn = Learn.objects.filter(
-                        gig=gigs, check_stu=check).last()
-                    if learn:
 
-                        os.environ["real_password_gigs" +
-                                   bio.user.username] = bio.address_password
-                        real_password = os.getenv(
-                            "real_password_gigs"+bio.user.username)
+                if bio.id == gigs.student.id:
 
-                        tran = contract.functions.transfer(gigs.user.address, web3.to_wei(gigs.price, 'ether')).buildTransaction(
-                            {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
-                        signed_txn = web3.eth.account.sign_transaction(
-                            tran, real_password)
-                        web3.eth.send_raw_transaction(
-                            signed_txn.rawTransaction)
-                        return redirect("gigs_view", id=id)
-                    else:
-                        return redirect("all_error")
+                    if final == bio.wallet_passcode and teen_balanced >= gigs.gig.price:
+                        learn = Learn.objects.filter(
+                            check_stu=gigs).last()
+                        if learn:
+
+                            os.environ["real_password_gigs" +
+                                       bio.user.username] = bio.address_password
+                            real_password = os.getenv(
+                                "real_password_gigs"+bio.user.username)
+
+                            tran = contract.functions.transfer(gigs.gig.user.address, web3.to_wei(gigs.gig.price, 'ether')).build_transaction(
+                                {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
+                            signed_txn = web3.eth.account.sign_transaction(
+                                tran, real_password)
+                            web3.eth.send_raw_transaction(
+                                signed_txn.rawTransaction)
+                            return redirect("payment_bill", id=id)
+                        else:
+                            return redirect("all_error")
 
             else:
                 return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
+    return render(request, "gigs/code_submit.html")
 
 # trade_api
 
@@ -506,8 +545,8 @@ def eth_to_teen(request, id):
                         real_password = os.getenv(
                             "real_password_teen"+bio.user.username)
 
-                        tran = contract.functions.transfer(post.user.address, web3.to_wei(post.changed_price, 'ether')).buildTransaction(
-                            {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
+                        tran = contract.functions.transfer(post.user.address, web3.to_wei(post.changed_price, 'ether')).build_transaction(
+                            {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, real_password)
                         web3.eth.send_raw_transaction(
@@ -517,7 +556,7 @@ def eth_to_teen(request, id):
                                    post.user.username] = post.user.address_password
                         test2 = os.getenv(
                             "real_password_eth"+post.user.username)
-                        tran = {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(
+                        tran = {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(
                             post.user.address), 'to': bio.address, 'value': web3.to_wei(post.change_value, 'ether')}
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, test2)
@@ -529,7 +568,7 @@ def eth_to_teen(request, id):
                 else:
                     return redirect("all_error")
             else:
-                return redirect("a_login")
+                return redirect("index")
 
 
 def teen_to_eth(request, id):
@@ -555,8 +594,8 @@ def teen_to_eth(request, id):
                         real_password = os.getenv(
                             "real_password_teen"+bio.user.username)
 
-                        tran = contract.functions.transfer(bio.address, web3.to_wei(post.changed_price, 'ether')).buildTransaction(
-                            {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
+                        tran = contract.functions.transfer(bio.address, web3.to_wei(post.changed_price, 'ether')).build_transaction(
+                            {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, real_password)
                         web3.eth.send_raw_transaction(
@@ -566,7 +605,7 @@ def teen_to_eth(request, id):
                                    post.user.username] = post.user.address_password
                         test2 = os.getenv(
                             "real_password_eth"+post.user.username)
-                        tran = {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(
+                        tran = {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(
                             post.user.address), 'to': bio.address, 'value': web3.to_wei(post.change_value, 'ether')}
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, test2)
@@ -578,7 +617,7 @@ def teen_to_eth(request, id):
                 else:
                     return redirect("all_error")
             else:
-                return redirect("a_login")
+                return redirect("index")
 
 # transfer_api
 
@@ -606,7 +645,7 @@ def teen_transfer(request):
                             "real_password_teen_transfer"+bio.user.username)
 
                         tran = contract.functions.transfer(post.user.address, web3.to_wei(value, 'ether')).build_transaction(
-                            {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
+                            {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(bio.address), 'value': 0})
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, real_password)
                         web3.eth.send_raw_transaction(
@@ -617,7 +656,7 @@ def teen_transfer(request):
                 else:
                     return redirect("all_error")
             else:
-                return redirect("a_login")
+                return redirect("index")
 
 
 def eth_transfer(request, id):
@@ -640,7 +679,7 @@ def eth_transfer(request, id):
                                    post.user.username] = post.user.address_password
                         test2 = os.getenv(
                             "real_password_eth"+post.user.username)
-                        tran = {'chainId': 11155111, 'gas': 3000000, 'nonce': web3.eth.get_transaction_count(
+                        tran = {'chainId': 11155111, 'gas': 2163200, 'nonce': web3.eth.get_transaction_count(
                             bio.address), 'to': post.address, 'value': web3.to_wei(value, 'ether')}
                         signed_txn = web3.eth.account.sign_transaction(
                             tran, test2)
@@ -652,7 +691,7 @@ def eth_transfer(request, id):
                 else:
                     return redirect("all_error")
             else:
-                return redirect("a_login")
+                return redirect("index")
 
 # like_api
 
@@ -670,7 +709,7 @@ def like_post(request, id):
             goal = "/post/#"+str(id)
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def like_document(request, id):
@@ -684,7 +723,7 @@ def like_document(request, id):
             post.like.remove(bio)
             return redirect("read_document", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def like_document(request, id):
@@ -698,7 +737,7 @@ def like_document(request, id):
             post.like.remove(bio)
             return redirect("read_document", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def like_gig(request, id):
@@ -712,7 +751,7 @@ def like_gig(request, id):
             post.like.remove(bio)
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def like_question(request, id):
@@ -726,7 +765,7 @@ def like_question(request, id):
             post.like.remove(bio)
             return redirect("question_view", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def like_answer(request, id):
@@ -740,7 +779,7 @@ def like_answer(request, id):
             post.like.remove(bio)
             return redirect("question_view", id=post.question.id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # dislike_api
 
@@ -758,7 +797,7 @@ def dislike_post(request, id):
             goal = "/posts/#"+str(id)+"/"
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def dislike_document(request, id):
@@ -772,7 +811,7 @@ def dislike_document(request, id):
             post.dislike.remove(bio)
             return redirect("document_view", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def dislike_gig(request, id):
@@ -786,7 +825,7 @@ def dislike_gig(request, id):
             post.dislike.remove(bio)
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def dislike_question(request, id):
@@ -800,7 +839,7 @@ def dislike_question(request, id):
             post.dislike.remove(bio)
             return redirect("read_question", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def dislike_answer(request, id):
@@ -814,7 +853,7 @@ def dislike_answer(request, id):
             post.dislike.remove(bio)
             return redirect("read_question", id=post.question.id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # comment_api
 
@@ -825,7 +864,7 @@ def comment_post_view(request, id):
         post = Post.objects.filter(id=id).first()
         context = {'comments': comments, 'post': post}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "post/comment_view.html", context)
 
 
@@ -849,7 +888,7 @@ def comment_post(request, id):
         else:
             return redirect("read_post", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def comment_gig(request, id):
@@ -873,7 +912,7 @@ def comment_gig(request, id):
         else:
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def comment_document(request, id):
@@ -897,7 +936,7 @@ def comment_document(request, id):
         else:
             return redirect("gig_view", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def answer(request, id):
@@ -924,7 +963,7 @@ def answer(request, id):
         else:
             return redirect("read_question", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # reply_comment_api
 
@@ -952,7 +991,7 @@ def reply_comment_post(request, id):
         else:
             return redirect("read_post", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def reply_comment_gig(request, id):
@@ -977,7 +1016,7 @@ def reply_comment_gig(request, id):
         else:
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def reply_comment_document(request, id):
@@ -1002,7 +1041,7 @@ def reply_comment_document(request, id):
         else:
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # search_api
 
@@ -1014,7 +1053,7 @@ def search_post(request):
 
             return redirect("searched_post", q=q)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def search_document(request):
@@ -1024,7 +1063,7 @@ def search_document(request):
 
             return redirect("searched_document", q=q)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def search_gig(request):
@@ -1034,7 +1073,7 @@ def search_gig(request):
 
             return redirect("searched_gig", q=q)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def search_question(request):
@@ -1044,7 +1083,7 @@ def search_question(request):
 
             return redirect("searched_question", q=q)
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # update_api
 
@@ -1069,7 +1108,7 @@ def update_gig(request, id):
             post.save()
             return redirect("read_gig", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("gigs/update.html", context)
 
 
@@ -1091,7 +1130,7 @@ def update_document(request, id):
             post.save()
             return redirect("read_document", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("document/update.html", context)
 
 
@@ -1113,7 +1152,7 @@ def update_question(request, id):
             post.save()
             return redirect("read_question", id=id)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("question/update.html", context)
 
 
@@ -1130,7 +1169,7 @@ def update_answer(request, id):
             post.save()
             return redirect("read_question", id=post.question.id)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("question/answer/update.html", context)
 
 
@@ -1146,7 +1185,7 @@ def update_post(request, id):
             goal = "/post/#"+str(id)
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("post/update.html", context)
 
 
@@ -1162,7 +1201,7 @@ def update_comment_post(request, id):
             goal = "/posts/#"+str(post.post.id)
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("post/comment/update.html", context)
 
 
@@ -1178,7 +1217,7 @@ def update_comment_gigs(request, id):
             goal = "/gig/"+str(post.post.id)+"/#"+str(id)
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("gigs/comment/update.html", context)
 
 
@@ -1194,7 +1233,7 @@ def update_comment_document(request, id):
             goal = "/document/"+str(post.post.id)+"/#"+str(id)
             return redirect(goal)
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render("document/comment/update.html", context)
 
 
@@ -1250,7 +1289,7 @@ def delete_education_rank(request, id):
         education_rank.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_user(request):
@@ -1264,7 +1303,7 @@ def delete_user(request):
 
         user.delete()
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_subject(request, id):
@@ -1273,7 +1312,7 @@ def delete_subject(request, id):
         subject.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_gigs(request, id):
@@ -1282,7 +1321,7 @@ def delete_gigs(request, id):
         gigs.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_comment_gig(request, id):
@@ -1291,7 +1330,7 @@ def delete_comment_gig(request, id):
         comment.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_join_cls(request, id):
@@ -1300,7 +1339,7 @@ def delete_join_cls(request, id):
         join_cls.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_question(request, id):
@@ -1309,7 +1348,7 @@ def delete_question(request, id):
         question.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_answer(request, id):
@@ -1318,7 +1357,7 @@ def delete_answer(request, id):
         answer.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_document(request, id):
@@ -1327,7 +1366,7 @@ def delete_document(request, id):
         document.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_post(request, id):
@@ -1336,7 +1375,7 @@ def delete_post(request, id):
         post.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_comment_Post(request, id):
@@ -1345,7 +1384,7 @@ def delete_comment_Post(request, id):
         comment.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_comment_document(request, id):
@@ -1354,7 +1393,7 @@ def delete_comment_document(request, id):
         comment.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_payment_method(request, id):
@@ -1363,7 +1402,7 @@ def delete_payment_method(request, id):
         payment_method.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def delete_trade(request, id):
@@ -1372,7 +1411,7 @@ def delete_trade(request, id):
         trade.delete()
         return redirect("home")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # user_api
 
@@ -1395,7 +1434,7 @@ def user_profile(request, id):
             context = {'user': bio, 'document': document,
                        'post': post, 'question': question, 'gig': gig, 'teen': teen}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "user/user_profile.html", context)
 
 
@@ -1405,9 +1444,9 @@ def your_profile(request):
 
         # balanced
         eth_balanced = float(web3.to_wei(
-            web3.eth.get_balance(bio.address), 'ether'))
+            web3.eth.get_balance(bio.address), 'wei') / 1000000000000000000)
         teen_balanced = float(web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'ether'))
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         # other
         document = Document.objects.filter(user=bio).last()
@@ -1418,7 +1457,7 @@ def your_profile(request):
         context = {'user': bio, 'document': document, 'post': post,
                    'question': question, 'gig': gig, 'eth': eth_balanced, 'teen': teen_balanced}
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "user/your_profile.html", context)
 
 
@@ -1434,7 +1473,7 @@ def add_social_media(request):
             bio.save()
             return redirect("your_profile")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def update_profile(request):
@@ -1458,7 +1497,7 @@ def update_profile(request):
 
             bio.save()
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "user/update.html", context)
 
 # apply
@@ -1475,12 +1514,12 @@ def apply_learning(request, id):
         return redirect('a_login')
 
 
-def logout(request):
+def log_out(request):
     if request.user.is_authenticated:
         logout(request)
-        return redirect("a_login")
+        return redirect("index")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 # error
 
@@ -1491,26 +1530,25 @@ def all_error(request):
 # tutor_function
 
 
-def generate_payment(request, id):
+def generate_payment(request, id, user_id):
     if request.user.is_authenticated:
         bio = Bio.objects.get(user=request.user)
         gig = Gigs.objects.get(id=id)
-        if bio.user.id == gig.user.user.id and request.method == "POST":
-            student = request.POST.get("student")
-            student = Bio.objects.get(id=student)
+        if bio.user.id == gig.user.user.id:
+            student = Bio.objects.filter(id=user_id).first()
 
-            cls = join_cls.objects.get(
-                student=student, gig=gig, status="Đang học")
-            learner = Learn.objects.filter(check=cls).last()
+            cls = join_cls.objects.filter(
+                student=student, gig=gig, Status="Đang Học").first()
+            learner = Learn.objects.filter(check_stu=cls).last()
             if cls:
                 generate_link = "http://localhost:8000/payment/gig/" + \
-                    str(id)+"/student/"+str(student.id)
+                    str(cls.id)
                 if not learner:
-                    sql = Learn(check=cls, cls_day=1)
+                    sql = Learn(check_stu=cls, cls_day=1)
                     sql.save()
-
-                sql = Learn(check=cls, cls_day=learner.cls_day + 1)
-                sql.save()
+                else:
+                    sql = Learn(check_stu=cls, cls_day=learner.cls_day + 1)
+                    sql.save()
                 sql = gig_payment_link(link=generate_link)
                 sql.save()
                 sql = gig_payment_link.objects.filter(
@@ -1519,7 +1557,7 @@ def generate_payment(request, id):
             else:
                 return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def copy_gig_payment_link(request, id):
@@ -1527,13 +1565,14 @@ def copy_gig_payment_link(request, id):
         bio = Bio.objects.get(user=request.user)
         link = gig_payment_link.objects.get(id=id)
         if bio and link:
-            clip.copy(link.link)
-            context = {'link': link}
+            teen_balanced = float(web3.to_wei(
+                contract.functions.balanceOf(bio.address).call(), 'ether'))
+            context = {'link': link, "teen": teen_balanced}
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
-    return render(request, 'gig/copy_payment_link.html', context)
+        return redirect("index")
+    return render(request, 'gigs/copy_payment_link.html', context)
 
 
 def apply_to_gig(request, id):
@@ -1542,9 +1581,9 @@ def apply_to_gig(request, id):
         post = Gigs.objects.filter(id=id).first()
         check = join_cls.objects.get(gig=post, student=bio)
         if not check and bio != post.user:
-            if check.status != "Đang Học":
+            if check.Status != "Đang Học":
                 sql = join_cls(gig=post, student=bio,
-                               status="Chờ Duyệt Đơn Đăng Ký")
+                               Status="Chờ Duyệt Đơn Đăng Ký")
                 sql.save()
             else:
                 return redirect("all_error")
@@ -1552,7 +1591,7 @@ def apply_to_gig(request, id):
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def accept_to_gig(request, id, user_id):
@@ -1561,17 +1600,14 @@ def accept_to_gig(request, id, user_id):
         student = Bio.objects.filter(user__id=user_id).first()
         post = Gigs.objects.filter(id=id).first()
         check = join_cls.objects.get(gig=post, student=student)
-        if not check and bio != post.user and student != post.user:
-            if check.status == "Chờ Duyệt Đơn Đăng Ký":
-                check.status = "Đang Học"
-                check.save()
-            else:
-                return redirect("all_error")
+        if check and bio == post.user and student != post.user:
+            check.Status = "Đang Học"
+            check.save()
             return redirect("gigs_view", id=id)
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def stop_learn_gig(request, id, user_id):
@@ -1580,9 +1616,9 @@ def stop_learn_gig(request, id, user_id):
         student = Bio.objects.filter(user__id=user_id).first()
         post = Gigs.objects.filter(id=id).first()
         check = join_cls.objects.get(gig=post, student=student)
-        if not check and bio == post.user and student != post.user:
-            if check.status == "Đang Học":
-                check.status = "Dừng/Nghỉ/Hoàn Thành Học"
+        if check and bio == post.user and student != post.user:
+            if check.Status == "Đang Học":
+                check.Status = "Dừng/Nghỉ/Hoàn Thành Học"
                 check.save()
             else:
                 return redirect("all_error")
@@ -1590,21 +1626,21 @@ def stop_learn_gig(request, id, user_id):
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
 
 
 def check_apply(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.get(user=request.user)
         post = Gigs.objects.filter(id=id).first()
-        check = join_cls.objects.get(
-            gig=post, student=bio, status="Chờ Duyệt Đơn Đăng Ký")
+        check = join_cls.objects.filter(
+            gig=post, Status="Chờ Duyệt Đơn Đăng Ký").all()
         if check and bio and post:
             context = {'students': check, 'gig': post}
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "gigs/check_list.html", context)
 
 
@@ -1612,14 +1648,14 @@ def check_student(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.get(user=request.user)
         post = Gigs.objects.filter(id=id).first()
-        check = join_cls.objects.get(
-            gig=post, student=bio, status="Đang Học")
+        check = join_cls.objects.filter(
+            gig=post, Status="Đang Học").all()
         if check and bio and post:
             context = {'students': check, 'gig': post}
         else:
             return redirect("all_error")
     else:
-        return redirect("a_login")
+        return redirect("index")
     return render(request, "gigs/check_list.html", context)
 
 
@@ -1637,3 +1673,22 @@ def view_all_gig(request):
     else:
         return render("a_login")
     return render(request, 'gigs/list.html', context)
+
+
+def payment_bill(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        check = join_cls.objects.filter(id=id).first()
+        if bio and check:
+            if bio == check.student and bio != check.gig.user:
+                teen = float(Web3.to_wei(
+                    contract.functions.balanceOf(bio.address).call(), 'ether'))
+
+                context = {"info": check, 'teen': teen}
+            else:
+                return redirect("all_error")
+        else:
+            return redirect("all_error")
+    else:
+        return redirect("index")
+    return render(request, "gigs/bill.html", context)

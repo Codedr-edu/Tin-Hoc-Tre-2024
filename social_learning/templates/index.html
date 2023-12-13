@@ -35,6 +35,10 @@
                             <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#exampleModal">
                                 Đăng ký
                             </button>
+                            <br>
+                            
+                            {% load socialaccount %}
+                            <a href="{% provider_login_url 'google' %}?next=/" class="btn btn-outline-primary w-100">Đăng nhập bằng Google</a>
                             
                             <!-- Modal -->
                             <div class="modal fade w-100" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -99,7 +103,7 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                    <button type="button" class="btn btn-success w-100" data-bs-dismiss="modal">Đăng ký</button>
+                                    <button type="submit" class="btn btn-success w-100">Đăng ký</button>
                                     </div>
                                 </form>
                                 </div>

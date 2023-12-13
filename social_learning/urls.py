@@ -7,7 +7,7 @@ urlpatterns = [
     # authenticate
     path('accounts/login', views.Login, name="a_login"),
     path('accounts/sign/up/', views.Signup, name="signup"),
-    path('logout/', views.logout, name="log_out"),
+    path('logout/', views.log_out, name="log_out"),
     # like
     path('like/gig/<int:id>', views.like_gig, name="like_gig"),
     path('like/document/<int:id>', views.like_document, name="like_document"),
@@ -50,8 +50,6 @@ urlpatterns = [
     path("create/gig/", views.gigs_create, name="create_gigs"),
     path("create/question/", views.question_create, name="create_question"),
     path('create/trade/', views.create_trade_offer, name="create_trade"),
-    # apply
-    path("apply/gig/<int:id>", views.apply_learning, name="apply_learning"),
     # update
     path("update/post/<int:id>", views.update_post, name="update_post"),
     path("update/document/<int:id>", views.update_document, name="update_document"),
@@ -99,7 +97,7 @@ urlpatterns = [
     # payment
     path("payment/question/<int:id>", views.question_payment, name="pay_question"),
     path("payment/document/<int:id>", views.document_payment, name="pay_document"),
-    path("payment/gig/<int:id>/student/<int:student_id>",
+    path("payment/gig/<int:id>",
          views.gigs_payment, name="pay_gig"),
     # trade
     path("trade/eth/to/teen/<int:id>",
@@ -120,7 +118,7 @@ urlpatterns = [
     # all_error
     path("error/all/", views.all_error, name="all_error"),
     # gig_payment_link
-    path("generate/payment/link/<int:id>",
+    path("generate/payment/link/gig/<int:id>/user/<int:user_id>",
          views.generate_payment, name="generation_link_payment"),
     path("copy/gig/payment/link/<int:id>",
          views.copy_gig_payment_link, name="copy_gig_payment_link"),
@@ -134,5 +132,7 @@ urlpatterns = [
     path("accept/gig/<int:id>/user/<int:user_id>",
          views.accept_to_gig, name="accept_gig"),
     path("stop/gig/<int:id>/user/<int:user_id>",
-         views.stop_learn_gig, name="stop_learn_gig")
+         views.stop_learn_gig, name="stop_learn_gig"),
+    path("check/", views.check, name="check"),
+    path("payment/bill/<int:id>", views.payment_bill, name="payment_bill")
 ]

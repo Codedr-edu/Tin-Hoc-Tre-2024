@@ -25,34 +25,34 @@
                 <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
                   <h1>Alclub</h1>
                 </a>
-      
+
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
                   <li>
-                    <a href="{% url 'gigs' %}" class="nav-link text-white">
+                    <a href="/gig/" class="nav-link text-white">
                       <i class="bi bi-person-video3"></i>
                       Gia Sư
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'post' %}" class="nav-link text-white">
+                    <a href="/post/" class="nav-link text-white">
                       <i class="bi bi-people"></i>
                       Cộng Đồng
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'question' %}" class="nav-link text-white">
+                    <a href="/question/" class="nav-link text-white">
                       <i class="bi bi-question-circle"></i>
                       Hỏi & Đáp
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'document' %}" class="nav-link text-white">
+                    <a href="/document/" class="nav-link text-white">
                       <i class="bi bi-file-earmark"></i>
                       Tài Liệu
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'trade' %}" class="nav-link text-white">
+                    <a href="/trade/" class="nav-link text-white">
                       <i class="bi bi-coin"></i>
                       Tài Chính
                     </a>
@@ -63,9 +63,9 @@
                         <i class="bi bi-person-circle"></i> Tài Khoản
                       </button>
                       <ul class="dropdown-menu">
-                        <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
-                        <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
-                        <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
+                        <li><a href="/your/profile/" class="dropdown-item">Thông Tin Tài Khoản</a></li>
+                        <li><a href="/update/profile" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
+                        <li><a href="/sign/out/" class="dropdown-item link-danger">Đăng Xuất</a></li>
                       </ul>
                     </div>
                   </li>
@@ -81,7 +81,7 @@
                   <button class="btn btn-success" type="submit"><i class="bi bi-search"></i></button>
                 </div>
               </form>
-    
+
               <div class="text-end justify-content-end align-items-end">
                 <div class="d-flex">
                     <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
@@ -91,32 +91,13 @@
           </div>
     </header>
     <div class="container">
-        <div class="justify-content-center align-items-center w-75 vh-75 mx-auto">
-            <table class="table w-100 shadow" style="border-radius: 10%;">
-                <thead>
-                    <th>ID</th>
-                    <th>Tên Người Dùng</th>
-                    <th>Trạng Thái</th>
-                    <th>Thanh toán</th>
-                    <th>Thay Đổi Trạng Thái</th>
-                </thead>
-                <tbody>
-                    {% if students %}
-                        {% for student in students %}
-                            <td>{{student.student.id}}</td>
-                            <td>{{student.student.user.username}}</td>
-                            <td>{{student.Status}}</td>
-                            {% if student.Status == "Đang Học" %}
-                                <td><a class="link-dark" href="/generate/payment/link/gig/{{student.gig.id}}/user/{{student.student.id}}">Tạo link thanh toán</a></td>
-                                <td><a class="link-dark" href="">Hoàn Tất / Dừng Học</a></td>
-                            {% elif student.Status == "Chờ Duyệt Đơn Đăng Ký" %}
-                                <td>Chưa có</td>
-                                <td><a class="link-dark" href="/accept/gig/{{student.gig.id}}/user/{{student.student.id}}">Cho Phép Học</a></td>
-                            {% endif %}
-                        {% endfor %}
-                    {% endif %}
-                </tbody>
-            </table>
+        <div style="padding: 5%;">
+            <div class="card rounded shadow-lg" style="padding: 10%;">
+                <div class="card-body">
+                   <h5 class="text-center">{{link.link}}</h5>
+                   <p class="text-center">Link thanh toán</p>
+                </div>
+            </div>
         </div>
     </div>
 </body>
