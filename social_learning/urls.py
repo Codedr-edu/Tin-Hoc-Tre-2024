@@ -13,8 +13,8 @@ urlpatterns = [
     path('like/document/<int:id>', views.like_document, name="like_document"),
     path('like/post/<int:id>', views.like_post, name="like_post"),
     path('like/question/<int:id>', views.like_question, name="like_question"),
+    path('like/answer/<int:id>', views.like_answer, name="like_answer"),
     # dislike
-    path('dislike/answer/<int:id>', views.dislike_answer, name="dislike_answer"),
     path('dislike/gig/<int:id>', views.dislike_gig, name="dislike_gig"),
     path('dislike/document/<int:id>',
          views.dislike_document, name="dislike_document"),
@@ -67,7 +67,7 @@ urlpatterns = [
     path("delete/document/<int:id>", views.delete_document, name="delete_document"),
     path("delete/gig/<int:id>", views.delete_gigs, name="delete_gig"),
     path("delete/question/<int:id>", views.delete_question, name="delete_question"),
-    path("delete/answer/<int:id>", views.delete_answer, name="delete_anwer"),
+    path("delete/answer/<int:id>", views.delete_answer, name="delete_answer"),
     path("delete/comment/post/<int:id>",
          views.delete_comment_Post, name="delete_comment_post"),
     path("delete/comment/document/<int:id>",

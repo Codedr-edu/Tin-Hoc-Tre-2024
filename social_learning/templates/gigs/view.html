@@ -89,7 +89,8 @@
             <h1 class="title is-1">{{post.title}}</h1>
             <div class="bg-secondary w-100 rounded" style="height: 3px; margin-top: 10px;margin-bottom: 10px;"></div>
             <p>{{post.description}}</p>
-            <ul class="list-group list-group-flush">
+            <ul class="list-group list-group-flush" style="margin-bottom: 10px;">
+              <li class="list-group-item">Giáo viên: {{post.user.user.username}}</li>
                 <li class="list-group-item">Khối Lớp: {{post.grade}}</li>
                 <li class="list-group-item">Học Liệu Đi Kèm: {{post.book_include}}</li>
                 <li class="list-group-item">Mục Tiêu: {{post.result}}</li>
@@ -112,10 +113,10 @@
             <div class="row" style="margin-top: 2%;">
                 {% if bio == post.user %}
                   <div class="col-lg">
-                    <a href="{% url 'apply_list_check' id=post.id %}" class="btn btn-outline-primary">Xem Các Đơn Đăng Ký</a>
+                    <a href="{% url 'apply_list_check' id=post.id %}" class="btn btn-outline-primary w-100">Xem Các Đơn Đăng Ký</a>
                   </div>
                   <div class="col-lg">
-                    <a href="{% url 'student_apply_gig' id=post.id %}" class="btn btn-primary">Xem Các Học Viên</a>
+                    <a href="{% url 'student_apply_gig' id=post.id %}" class="btn btn-primary w-100">Xem Các Học Viên</a>
                   </div>
                 {% else %}
                 <div class="col-lg">
@@ -127,12 +128,12 @@
             <div class="bg-secondary w-100 rounded" style="height: 3px;"></div>
             <br>
             <h2 class="text-center">Bình Luận</h2>
-            <form action="comment/gig/{{post.id}}" method="post" enctype="multipart/form-data">
+            <form action="/comment/gig/{{post.id}}" method="post" enctype="multipart/form-data">
               {% csrf_token %}
                 <div class="row w-100">
                     <div class="col-lg align-self-center w-100">
                         <div class="d-lg-flex w-100">
-                            <input placeholder="Bình Luận" type="text" class="form-control w-100" style="margin-right: 10px;">
+                            <input placeholder="Bình Luận" type="text" name="content" class="form-control w-100" style="margin-right: 10px;">
                             <button type="submit" class="btn btn-success"><i class="bi bi-send"></i></button>
                         </div>
                     </div>
@@ -141,10 +142,10 @@
         <br>
             {% if comments %}
                 {% for comment in comments %}
-                <div class="card" id="{{comment.id}}">
+                <div class="card" style="margin-bottom: 10px;" id="{{comment.id}}">
                     <div class="card-body">
-                     <h6>Trả lời</span> {{comment.content}}</h6>
-                     <p>{{comment.user.username}} - {{comment.datetime}} - <a type="button" class="link-secondary" data-bs-toggle="modal" data-bs-target="#reply_comment_1">Trả lời</a></p>
+                     <h6>{{comment.content}}</h6>
+                     <p>{{comment.user.user.username}}</p>
                     </div>
                  </div>
                     <div class="modal fade" id="reply_comment_1" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

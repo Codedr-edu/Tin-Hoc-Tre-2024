@@ -349,8 +349,8 @@ def question_create(request):
                            subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0)
             sql.save()
 
-            sql = Question.objects.get(title=title, description=description, price=price, file=file,
-                                       subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0)
+            sql = Question.objects.filter(title=title, description=description, price=price, file=file,
+                                          subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0).first()
             return redirect("question_view", id=sql.id)
     else:
         return redirect("index")
@@ -437,6 +437,7 @@ def question_payment(request, id):
                     return redirect("all_error")
             else:
                 return redirect("index")
+    return render(request, "gigs/code_submit.html")
 
 
 def document_payment(request, id):
@@ -905,12 +906,9 @@ def comment_gig(request, id):
                 post.comment_counter += 1
                 post.save()
 
-                sql = Comment_Gigs.objects.filter(
-                    post=post, user=bio, content=content).first()
-                goal = "/gig/"+str(id)+"/#"+str(sql.id)+"/"
-                return redirect(goal)
+                return redirect("gigs_view", id=id)
         else:
-            return redirect("read_gig", id=id)
+            return redirect("gigs_view", id=id)
     else:
         return redirect("index")
 
@@ -1243,7 +1241,9 @@ def gigs_view(request, id):
         bio = Bio.objects.get(user=request.user)
         gigs = Gigs.objects.filter(id=id).first()
         noti = Comment_Gigs.objects.filter(post=gigs).all()
-        context = {'post': gigs, "notis": noti, 'bio': bio}
+        teen = float(Web3.to_wei(
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
+        context = {'post': gigs, "comments": noti, 'bio': bio, "teen": teen}
     else:
         return redirect('a_login')
     return render(request, 'gigs/view.html', context)
@@ -1253,7 +1253,8 @@ def question_view(request, id):
     if request.user.is_authenticated:
         question = Question.objects.filter(id=id).first()
         noti = Answer.objects.filter(question=question).all()
-        context = {'post': question, "answers": noti}
+        bio = Bio.objects.filter(user=request.user).first()
+        context = {'post': question, "answers": noti, "bio": bio}
     else:
         return redirect('a_login')
     return render(request, 'question/view.html', context)

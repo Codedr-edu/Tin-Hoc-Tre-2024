@@ -136,7 +136,7 @@
         <br>
             {% if answers %}
                 {% for answer in answers %}
-                    <div class="card" id="{{answer.id}}">
+                    <div class="card" id="{{answer.id}}" style="margin-bottom: 10px;">
                         {% if answer.image %}
                             <img src="{{answer.image.url}}" class="img-fluid w-100 h-50" style="object-fit: cover;" />
                         {% endif %}
@@ -167,8 +167,7 @@
                                                 </div>
                                               </div>
                                             </div>
-                                        {% endif %}
-                                        {% if bio == answer.user %}
+                                        {% elif post.user != bio and answer.user == bio %}
                                         <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
                                         <div class="modal fade" id="delete_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                           <div class="modal-dialog modal-dialog-centered">
@@ -192,6 +191,7 @@
                                     </div>
                                 </div>
                             </div>
+                            <p>{{answer.user.user.username}}</p>
                             <br>
                             <div class="row">
                                 <div class="col-lg">
