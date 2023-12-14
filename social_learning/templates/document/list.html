@@ -159,18 +159,20 @@
                             <label>Tiêu Đề</label>
                             <input type="text" name="title" class="form-control">
                         </div>
+                      </div>
+                      <div class="row" style="margin-top: 10px;">
                         <div class="col-lg">
-                            <label>Học Vấn</label>
-                            <select id="edu_rank" name="education_rank" class="form-select" required>
-                                {% for edu in educations %}
-                                    <option value="{{edu.id}}">{{edu.name}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-lg">
-                            <label>Lớp</label>
-                            <input type="number" name="grade" class="form-control w-100" required>
-                        </div>
+                          <label>Học Vấn</label>
+                          <select id="edu_rank" name="education_rank" class="form-select" required>
+                              {% for edu in educations %}
+                                  <option value="{{edu.id}}">{{edu.name}}</option>
+                              {% endfor %}
+                          </select>
+                      </div>
+                      <div class="col-lg">
+                          <label>Lớp</label>
+                          <input type="number" name="grade" class="form-control w-100" required>
+                      </div>
                       </div>
                       <div class="row" style="margin-top: 10px;">
                         <div class="col">

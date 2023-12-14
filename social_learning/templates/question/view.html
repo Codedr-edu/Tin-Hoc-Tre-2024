@@ -143,10 +143,12 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-lg align-self-start">
-                                    <h4>{{answer.content}}</h4>
+                                    <div class="d-flex">
+                                      <h4>{{answer.content}}</h4> {% if answer.choosen == 1 and post.answered == 1 %} <span class="bg-primary rounded" style="padding: 3px;">Check</span> {% else %} {% endif %}
+                                    </div>
                                 </div>
                                 <div class="col-lg align-self-end">
-                                    <div class="d-lg-flex">
+                                    <div class="d-lg-flex align-items-end justify-content-end" style="margin-right: 10%;">
                                         {% if bio == post.user and post.answered == 0 %}
                                             <button type="button" data-bs-toggle="modal" data-bs-target="#check_question" class="btn btn-success"><i class="bi bi-check-lg"></i></button>
                                             <div class="modal fade" id="check_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -195,10 +197,10 @@
                             <br>
                             <div class="row">
                                 <div class="col-lg">
-                                    <a href="{% url 'like_answer' id=answer.id %}" class="btn btn-primary w-100">Like</a>
+                                    <a href="{% url 'like_answer' id=answer.id %}" class="btn btn-primary w-100">{{answer.like.count}} Like</a>
                                 </div>
                                 <div class="col-lg">
-                                    <a href="{% url 'dislike_answer' id=answer.id %}" class="btn btn-danger w-100">Dislike</a>
+                                    <a href="{% url 'dislike_answer' id=answer.id %}" class="btn btn-danger w-100">{{answer.dislike.count}} Dislike</a>
                                 </div>
                             </div>
                             <div class="row" style="margin-top: 10px;">

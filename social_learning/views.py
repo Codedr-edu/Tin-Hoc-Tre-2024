@@ -1243,7 +1243,8 @@ def gigs_view(request, id):
         noti = Comment_Gigs.objects.filter(post=gigs).all()
         teen = float(Web3.to_wei(
             contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
-        context = {'post': gigs, "comments": noti, 'bio': bio, "teen": teen}
+        context = {'post': gigs, "comments": noti,
+                   'bio': bio, "teen": teen, "teen": teen}
     else:
         return redirect('a_login')
     return render(request, 'gigs/view.html', context)
@@ -1254,7 +1255,9 @@ def question_view(request, id):
         question = Question.objects.filter(id=id).first()
         noti = Answer.objects.filter(question=question).all()
         bio = Bio.objects.filter(user=request.user).first()
-        context = {'post': question, "answers": noti, "bio": bio}
+        teen = float(Web3.to_wei(
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
+        context = {'post': question, "answers": noti, "bio": bio, "teen": teen}
     else:
         return redirect('a_login')
     return render(request, 'question/view.html', context)
@@ -1267,7 +1270,10 @@ def document_view(request, id):
         check = have_buy_document.objects.filter(
             document=document, user=bio).first()
         noti = Comment_Document.objects.filter(post=document).all()
-        context = {'post': document, "comments": noti, 'check': check}
+        teen = float(Web3.to_wei(
+            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
+        context = {'post': document, "comments": noti,
+                   'check': check, "teen": teen}
     else:
         return redirect('a_login')
     return render(request, 'document/view.html', context)
