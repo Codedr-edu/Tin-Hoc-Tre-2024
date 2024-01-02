@@ -20,12 +20,6 @@
       
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
                   <li>
-                    <a href="{% url 'gigs' %}" class="nav-link text-white">
-                      <i class="bi bi-person-video3"></i>
-                      Gia Sư
-                    </a>
-                  </li>
-                  <li>
                     <a href="{% url 'post' %}" class="nav-link text-white">
                       <i class="bi bi-people"></i>
                       Cộng Đồng
@@ -44,12 +38,6 @@
                     </a>
                   </li>
                   <li>
-                    <a href="{% url 'trade' %}" class="nav-link text-white">
-                      <i class="bi bi-coin"></i>
-                      Tài Chính
-                    </a>
-                  </li>
-                  <li>
                     <div class="dropdown">
                       <button class="nav-link text-white dropdown-toggle" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle"></i> Tài Khoản
@@ -57,6 +45,9 @@
                       <ul class="dropdown-menu">
                         <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
                         <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
+                        {% if bio.user.is_staff %}
+                        <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
+                        {% endif %}
                         <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
                       </ul>
                     </div>
@@ -67,17 +58,13 @@
           </div>
           <div class="px-3 py-2 shadow mb-3">
             <div class="container rows flex-wrap justify-content-center" style="display: flex;">
-              <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
-                <div class="d-flex">
-                  <input placeholder="Tìm kiếm..." type="text" class="form-control w-100" style="margin-right: 10px;">
-                  <button class="btn btn-success" type="submit"><i class="bi bi-search"></i></button>
-                </div>
-              </form>
+              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
+                <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
+              </div>
 
               <div class="text-end justify-content-end align-items-end">
-                <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
                 {% if bio == post.user %}
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
+                    <a href="{% url 'delete_question' id=post.id %}" class="btn btn-danger"><i class="bi bi-x-lg"></i></a>
                 {% endif %}
               </div>
             </div>
@@ -91,7 +78,7 @@
             <p>{{post.description}}</p>
             <h3>Phần thưởng lên đến: {{post.price}} Teen</h3>
             {% if post.image %}
-                <img src="{{post.image.url}}" class="img-fluid w-100 h-50 rounded" style="object-fit: cover;" />
+                <img src="{{post.image.url}}" class="img-fluid w-100 h-50 rounded" style="object-fit: cover;margin-bottom: 10px;" />
             {% endif %}
             <div class="row">
                 <div class="col-lg">
@@ -104,7 +91,7 @@
             <div class="row" style="margin-top: 2%;">
                 <div class="col-lg">
                     {% if post.file %}
-                        <a href="{{post.file}}" class="btn btn-info w-100">Tài Liệu</a>
+                        <a href="{% url 'download_question_file' id=post.id %}" class="btn btn-info w-100">Tài Liệu</a>
                     {% else %}
                         <a class="btn disabled btn-info w-100">Tài Liệu</a>
                     {% endif %}
@@ -114,7 +101,7 @@
             <div class="bg-secondary w-100 rounded" style="height: 3px;"></div>
             <br>
             <h2 class="text-center">Lời Giải</h2>
-            <form action="/answer/question/{{post.id}}" method="post" enctype="multipart/form-data">
+            <form action="/answer/question/{{post.id}}" method="POST" enctype="multipart/form-data">
               {% csrf_token %}
                 <div class="row w-100">
                     <div class="col-lg align-self-center w-100">
@@ -123,8 +110,16 @@
                         </div>
                         <br>
                         <div class="d-lg-flex w-100">
-                          <input type="file" name="image" class="form-control" style="margin-right: 10px;">
-                          <input type="text" name="file" placeholder="Tài liệu tham khảo" class="form-control">
+                          <div class="columns w-100">
+                            <div class="column w-100">
+                              <label>Ảnh</label>
+                              <input type="file" name="image" class="form-control" style="margin-right: 10px;">
+                            </div>
+                            <div class="column w-100">
+                              <label>Tài liệu</label>
+                              <input type="file" name="file" placeholder="Tài liệu tham khảo" class="form-control">
+                            </div>
+                          </div>
                         </div>
                         <br>
                         <div class="d-lg-flex">
@@ -162,7 +157,11 @@
                                                       <p>Bạn có chắc chắn rằng sẽ chọn câu trả lời này</p>
                                                       <div class="d-lg-flex">
                                                         <button class="btn btn-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Tôi cần suy nghĩ thêm</button>
-                                                        <a class="btn btn-success" href="{% url 'pay_question' id=answer.id %}">Tôi chắc chắn</a>
+                                                        {% if post.price > 0 %}
+                                                          <a class="btn btn-success" href="{% url 'pay_question' id=answer.id %}">Tôi chắc chắn</a>
+                                                        {% else %}
+                                                          <a class="btn btn-success" href="{% url 'check_question' id=answer.id %}">Tôi chắc chắn</a>
+                                                        {% endif %}
                                                       </div>
                                                   </form>
                                                   </div>

@@ -23,16 +23,10 @@
             <div class="container">
               <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
                 <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                  <h1>Alclub</h1>
+                  <h1>BDTeen</h1>
                 </a>
       
                 <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-                  <li>
-                    <a href="{% url 'gigs' %}" class="nav-link text-white">
-                      <i class="bi bi-person-video3"></i>
-                      Gia Sư
-                    </a>
-                  </li>
                   <li>
                     <a href="{% url 'post' %}" class="nav-link text-white">
                       <i class="bi bi-people"></i>
@@ -49,12 +43,6 @@
                     <a href="{% url 'document' %}" class="nav-link text-white">
                       <i class="bi bi-file-earmark"></i>
                       Tài Liệu
-                    </a>
-                  </li>
-                  <li>
-                    <a href="{% url 'trade' %}" class="nav-link text-white">
-                      <i class="bi bi-coin"></i>
-                      Tài Chính
                     </a>
                   </li>
                   <li>
@@ -83,7 +71,7 @@
               </form>
 
               <div class="text-end justify-content-end align-items-end">
-                <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
+                <a class="btn btn-primary">Số dư của bạn: {{user.balance}}</a>
                 {% if bio == post.user %}
                     <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
                 {% endif %}

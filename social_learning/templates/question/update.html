@@ -28,12 +28,6 @@
   
             <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
               <li>
-                <a href="{% url 'gigs' %}" class="nav-link text-white">
-                  <i class="bi bi-person-video3"></i>
-                  Gia Sư
-                </a>
-              </li>
-              <li>
                 <a href="{% url 'post' %}" class="nav-link text-white">
                   <i class="bi bi-people"></i>
                   Cộng Đồng
@@ -65,6 +59,9 @@
                   <ul class="dropdown-menu">
                     <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
                     <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
+                    {% if bio.user.is_staff %}
+                    <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
+                    {% endif %}
                     <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
                   </ul>
                 </div>

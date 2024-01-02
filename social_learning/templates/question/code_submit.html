@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <style>
+      @media only screen and (min-width: 1000px) {
+        .is-none{
+          margin-left: -95%;
+        }
+      }
+    </style>
+</head>
+<body>
+    <header class="bg-light">
+        <div class="px-3 py-2 bg-dark text-white">
+            <div class="container">
+              <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+                <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
+                  <h1>Alclub</h1>
+                </a>
+      
+                <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+                  <li>
+                    <a href="{% url 'post' %}" class="nav-link text-white">
+                      <i class="bi bi-people"></i>
+                      Cộng Đồng
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'question' %}" class="nav-link text-white">
+                      <i class="bi bi-question-circle"></i>
+                      Hỏi & Đáp
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'document' %}" class="nav-link text-white">
+                      <i class="bi bi-file-earmark"></i>
+                      Tài Liệu
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown">
+                      <button class="nav-link text-white dropdown-toggle" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-person-circle"></i> Tài Khoản
+                      </button>
+                      <ul class="dropdown-menu">
+                        <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
+                        <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
+                        {% if bio.user.is_staff %}
+                        <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
+                        {% endif %}
+                        <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
+                      </ul>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="px-3 py-2 shadow mb-3">
+            <div class="container rows flex-wrap justify-content-center" style="display: flex;">
+              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
+              </div>
+    
+              <div class="text-end justify-content-end align-items-end">
+                <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
+              </div>
+            </div>
+          </div>
+    </header>
+    <div class="container">
+        <div style="padding: 5%;">
+            <div class="card rounded shadow-lg" style="padding: 10%;">
+                <div class="card-body w-100">
+                   <form method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg">
+                            <input type="password" pattern="*[0-9]" class="form-control" name="code" id="code"/>
+                        </div>
+                        <div class="col-lg">
+                            <button type="submit" class="btn btn-success w-100">Thanh toán</button>
+                        </div>
+                    </div>
+                   </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

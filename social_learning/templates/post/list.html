@@ -27,12 +27,6 @@
   
             <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
               <li>
-                <a href="{% url 'gigs' %}" class="nav-link text-white">
-                  <i class="bi bi-person-video3"></i>
-                  Gia Sư
-                </a>
-              </li>
-              <li>
                 <a href="{% url 'post' %}" class="nav-link text-secondary">
                   <i class="bi bi-people"></i>
                   Cộng Đồng
@@ -51,12 +45,6 @@
                 </a>
               </li>
               <li>
-                <a href="{% url 'trade' %}" class="nav-link text-white">
-                  <i class="bi bi-coin"></i>
-                  Tài Chính
-                </a>
-              </li>
-              <li>
                 <div class="dropdown">
                   <button class="nav-link text-white dropdown-toggle" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-person-circle"></i> Tài Khoản
@@ -64,6 +52,9 @@
                   <ul class="dropdown-menu">
                     <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
                     <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
+                    {% if bio.user.is_staff %}
+                    <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
+                    {% endif %}
                     <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
                   </ul>
                 </div>
@@ -74,9 +65,15 @@
       </div>
       <div class="px-3 py-2 shadow mb-3">
         <div class="container rows flex-wrap justify-content-center" style="display: flex;">
-          <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
+          <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto" method="GET" enctype="multipart/form-data">
             <div class="d-flex">
-              <input placeholder="Tìm kiếm..." type="text" class="form-control w-100" style="margin-right: 10px;">
+              <input placeholder="Tìm kiếm..." type="text" name="search" class="form-control w-100" style="margin-right: 10px;">
+              <select class="form-select w-50" style="margin-right: 10px;" name="topic">
+                <option value="">---</option>
+                {% for subject in subjects %}
+                <option value="{{subject.id}}">{{subject.name}}</option>
+                {% endfor %}
+              </select>
               <button class="btn btn-success" type="submit"><i class="bi bi-search"></i></button>
             </div>
           </form>
@@ -114,8 +111,9 @@
                               </button>
                               <ul class="dropdown-menu">
                                 {% if request.user.id == post.user.id %}
-                                  <li><button data-bs-target="#delete" data-bs-toggle="modal" class="dropdown-item link-danger" href="#">Xóa Bài Viết</button></li>
+                                  <li><a class="dropdown-item link-danger" href="{% url 'delete_post' id=post.id %}">Xóa Bài Viết</a></li>
                                 {% endif %}
+                                <li><a class="dropdown-item link-danger" href="{% url 'down_post' id=post.id %}">Báo Cáo Bài Viết</a></li>
                               </ul>
                             </div>
                           </div>
@@ -132,6 +130,11 @@
                           </div>
                           <div class="column w-100">
                             <a href="{% url 'comment_post_view' id=post.id %}" class="btn btn-secondary w-100"><i class="bi bi-chat-left-text"></i> {{post.comment_counter}}</a>
+                          </div>
+                        </div>
+                        <div class="columns">
+                          <div class="column w-100">
+                            <a href="{% url 'post_payment' id=post.id %}" class="btn btn-primary w-100">Ủng hộ bài viết</a>
                           </div>
                         </div>
                         </div>
@@ -163,25 +166,14 @@
                     {% csrf_token %}
                       <textarea class="form-control shadow" name="content" id="content" cols="100" rows="10" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
                       <br>
+                      <select class="form-select" name="subject">
+                        {% for subject in subjects %}
+                        <option value="{{subject.id}}">{{subject.name}}</option>
+                        {% endfor %}
+                      </select>
+                      <br>
                       <button class="btn shadow btn-success w-100">Đăng</button>
                   </form>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="modal fade" id="delete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            Xóa Bài Viết
-          </div>
-          <div class="modal-body">
-            Bạn có Chắc Là Muốn Xóa Bài Viết Này Không?
-          </div>
-          <div class="modal-footer">
-                <a href="" class="btn btn-danger">Tôi Chắc Chắn</a>
-                <a href="" class="btn btn-secondary" data-bs-dismiss="#delete">Không, Tôi Không Muốn Xóa</a>
-            </div>
           </div>
         </div>
       </div>
