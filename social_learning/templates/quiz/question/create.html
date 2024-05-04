@@ -55,35 +55,49 @@
             <div class="column">
                 <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <h1>GPTeen Answer</h1>
-                        <p>Lưu ý: Câu trả lời của GPTeen vẫn có thể có sai số. Hãy cân nhắc thật kỹ trước khi sử dụng</p>
+                        <h1>Thêm câu hỏi</h1>
+                        <p>Hãy tạo ra những câu hỏi và bộ quiz thú vị cho các bạn học sinh nhé</p>
                     </div>
                 </div>
-                  <div class="card rounded shadow-lg" style="padding: 10%;">
-                      <div class="card-body">
-                        {% if status != "Công khai" %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Đợi chúng mình xem qua tý nha. Trong lúc đó sao ko khám phá BDTeen</p>
-                         <!-- <a href="" class="link-primary align-items-center text-center">Về BDTeen check</a> -->
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                           <a href="{% url 'post' %}" class="btn btn-outline-primary w-100">Khám phá các bài viết tuyệt vời khác nào</a>
-                          </div>
-                         </div>
-                         {% else %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Trở lại xem kết quả nào. Hãy reload lại nếu không thấy bài viết nhé</p>
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                            <input type=button value="Khám phá các bài viết tuyệt vời khác nào" class="btn btn-primary w-100" onClick="javascript:history.go(-1);"></a>
-                          </div>
-                         </div>
-                         {% endif %}
+                <form enctype="multipart/form-data" method="post">
+                    {% csrf_token %}
+                      <div class="row">
+                        <div class="col-lg">
+                            <label>Câu hỏi</label>
+                            <input type="text" name="title" class="form-control">
+                        </div>
                       </div>
-                  </div>
-              </div>
+                      <div class="row" style="margin-top: 10px;">
+                        <div class="col-lg">
+                          <label>Đáp án A</label>
+                          <input type="text" name="ans_a" class="form-control">
+                      </div>
+                      <div class="col-lg">
+                        <label>Đáp án B</label>
+                        <input type="text" name="ans_b" class="form-control">
+                    </div>
+                      </div>
+                      <div class="row" style="margin-top: 10px;">
+                        <div class="col-lg">
+                          <label>Đáp án C</label>
+                          <input type="text" name="ans_c" class="form-control">
+                      </div>
+                      <div class="col-lg">
+                        <label>Đáp án D</label>
+                        <input type="text" name="ans_d" class="form-control">
+                    </div>
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="col">
+                            <label>Đáp án đúng</label>
+                            <input type="text" name="correct_answer" class="form-control">
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top: 10px;">
+                        <div class="col">
+                            <button type="submit" class="btn btn-success w-100">Thêm câu</button>
+                        </div>
+                    </div>
+                  </form>
             </div>
         </div>
     </div>

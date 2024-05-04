@@ -4,101 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
-    <style>
-      @media only screen and (min-width: 1000px) {
-        .is-none{
-          margin-left: -95%;
-        }
-      }
-    </style>
 </head>
 <body>
-  <header class="bg-light">
-    <div class="px-3 py-2 bg-dark text-white">
+    <nav class="navbar sticky-top bg-dark text-light">
         <div class="container">
-          <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-              <h1>Alclub</h1>
-            </a>
-  
-            <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-              <li>
-                <a href="{% url 'post' %}" class="nav-link text-secondary">
-                  <i class="bi bi-people"></i>
-                  Cộng Đồng
-                </a>
-              </li>
-              <li>
-                <a href="{% url 'question' %}" class="nav-link text-white">
-                  <i class="bi bi-question-circle"></i>
-                  Hỏi & Đáp
-                </a>
-              </li>
-              <li>
-                <a href="{% url 'document' %}" class="nav-link text-white">
-                  <i class="bi bi-file-earmark"></i>
-                  Tài Liệu
-                </a>
-              </li>
-              <li>
-                <div class="dropdown">
-                  <button class="nav-link text-white dropdown-toggle" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle"></i> Tài Khoản
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
-                    <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
-                    {% if bio.user.is_staff %}
-                    <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
-                    {% endif %}
-                    <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
-                  </ul>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <div class="px-3 py-2 shadow mb-3">
-        <div class="container rows flex-wrap justify-content-center" style="display: flex;">
-          <form class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto" method="GET" enctype="multipart/form-data">
-            <div class="d-flex">
-              <input placeholder="Tìm kiếm..." type="text" name="search" class="form-control w-100" style="margin-right: 10px;">
-              <select class="form-select w-50" style="margin-right: 10px;" name="topic">
-                <option value="">---</option>
-                {% for subject in subjects %}
-                <option value="{{subject.id}}">{{subject.name}}</option>
-                {% endfor %}
-              </select>
-              <button class="btn btn-success" type="submit"><i class="bi bi-search"></i></button>
-            </div>
-          </form>
-
+            <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
           <div class="text-end justify-content-end align-items-end">
-            <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
+            <div class="columns">
+                <div class="column w-100">
+                    <a class="btn btn-primary btn-lg" style="width:150px;">Điểm: {{bio.balance}}</a>
+                </div>
+            </div>
           </div>
         </div>
-      </div>
-</header>
-    <main>
-        <div class="container">
-            <br>
-            <div class="card w-75 d-flex justify-content-center align-items-center mx-auto vh-75" style="box-shadow: none;border: none;">
-                    <button type="button" data-bs-toggle="modal" data-bs-target="#exampleModal" class="btn btn-success w-100 shadow">Tạo Bài Viết</button>
+      </nav>
+    <div class="container">
+        <div class="columns h-100" style="margin-top:15px;">
+            <div class="column is-one-quarter">
+                <div style="position: sticky;position: -webkit-sticky;z-index: 1; /* Stay on top */
+                top: 0; /* Stay at the top */
+                left: 0;">
+                    <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
+                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
+                <b>Tìm kiếm</b>
+                <form style="margin-bottom: 10px;">
+                    <div class="columns">
+                        <div class="column" style="margin-right: -15px;">
+                            <input placeholder="Tìm kiếm..." type="text" name="search" class="form-control w-100">
+                        </div>
+                        <div class="column">
+                            <select class="form-select w-100" style="margin-right: 10px;" name="topic">
+                                <option value="">---</option>
+                                {% for subject in subjects %}
+                                <option value="{{subject.id}}">{{subject.name}}</option>
+                                {% endfor %}
+                              </select>
+                        </div>
+                    </div>
+                    <div class="columns" style="margin-top: -30px;">
+                        <div class="column">
+                            <button class="button is-success is-fullwidth">Search</button>
+                        </div>
+                    </div>
+                </form>
+                <b>Phân trang</b>
+                <ul style="padding-top: 5px;margin-bottom: 10px;">
+                    <li><a href="{% url 'post' %}" class="button is-primary is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'question' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Hỏi đáp</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'document' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Tài liệu</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'quiz' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Quiz luyện tập</a></li>
+                </ul>
+                <b>Về {{bio.user.username}}</b>
+                <ul style="padding-top: 5px;margin-bottom: 10px;">
+                    <li><a href="{% url 'your_profile' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Trang cá nhân</a></li>
+                    <li style="margin-top: 10px;"><a class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Điểm & Vinh danh</a></li>
+                </ul>
+                <b>Khác</b>
+                <ul style="padding-top: 5px;">
+                  {% if bio.user.is_staff %}
+                  <li><a href="{% url 'staff_index' %}" class="button is-success is-rounded is-fullwidth" style="text-decoration: none;">Trang Quản Trị Viên</a></li>
+                  {% endif %}
+                  <li style="margin-top: 10px;"><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
+                  <li style="margin-top: 10px;"><a class="button is-warning is-rounded is-fullwidth" style="text-decoration: none;">Hỗ trợ & Báo cáo sự cố kỹ thuật</a></li>
+                </ul>
+                </div>
             </div>
-            <br>
-            {% if posts|length != 0 %}
+            <div class="column">
+                <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
+                    <div style="padding: 30px;">
+                        <h1>Trang cộng đồng</h1>
+                        <p>Nơi bạn có thể chia sẻ nhiều điều về hành trình học tập của mình</p>
+                    </div>
+                </div>
+                <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" data-bs-toggle="modal" data-bs-target="#exampleModal"  class="btn btn-info w-100">Đăng bài viết</a>
+                {% if posts|length != 0 %}
                 {% for post in posts %}
-                    <div class="d-flex justify-content-center shadow align-items-start w-75 vh-75 mx-auto card">
+                    <div class="d-flex justify-content-center shadow align-items-start w-100 mx-auto card">
                         <div class="card-header w-100" id="{{post.id}}">
                             <div class="container">
                                 <div class="columns">
                                   <div class="column">
-                                    <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;"> <a class="link-dark">   {{post.user.user.username}}</a>
+                                    <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a class="link-dark">   {{post.user.user.username}}</a>
                                   </div>
                                 </div>
                             </div>
@@ -109,11 +99,11 @@
                               <button class="" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-three-dots-vertical"></i>
                               </button>
-                              <ul class="dropdown-menu">
+                              <ul class="dropdown-menu bg-light">
                                 {% if request.user.id == post.user.id %}
-                                  <li><a class="dropdown-item link-danger" href="{% url 'delete_post' id=post.id %}">Xóa Bài Viết</a></li>
+                                  <li><a class="dropdown-item bg-light link-danger" href="{% url 'delete_post' id=post.id %}">Xóa Bài Viết</a></li>
                                 {% endif %}
-                                <li><a class="dropdown-item link-danger" href="{% url 'down_post' id=post.id %}">Báo Cáo Bài Viết</a></li>
+                                <li><a class="dropdown-item bg-light link-danger" href="{% url 'down_post' id=post.id %}">Báo Cáo Bài Viết</a></li>
                               </ul>
                             </div>
                           </div>
@@ -134,7 +124,7 @@
                         </div>
                         <div class="columns">
                           <div class="column w-100">
-                            <a href="{% url 'post_payment' id=post.id %}" class="btn btn-primary w-100">Ủng hộ bài viết</a>
+                            <a data-bs-toggle="modal" data-bs-target="#check_code" class="btn btn-primary w-100">Ủng hộ bài viết</a>
                           </div>
                         </div>
                         </div>
@@ -142,6 +132,36 @@
                           <p class="text-center">{{post.datetime}}</p>
                         </div>
                     </div>
+                    <div class="modal fade" id="check_code" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <h1>Nhập pincode bảo mật</h1>
+                              <form action="{% url 'pay_question' id=post.id %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                  <div class="row w-100" style="margin-bottom: 10px;">
+                                      <div class="col-lg align-self-center w-100">
+                                          <div class="d-lg-flex w-100">
+                                            <input placeholder="Nhập số điểm ủng hộ" type="number"  name="value" class="form-control w-100" style="margin-right: 10px;">
+                                              <input placeholder="Nhập pincode" type="number" maxlength="6" minlength="6" name="code" class="form-control w-100">
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="row w-100">
+                                    <div class="col-lg align-items-center w-100">
+                                      <div class="d-lg-flex w-100">
+                                        <button type="submit" class="btn btn-success w-100"><i class="bi bi-send"></i></button>
+                                      </div>
+                                    </div>
+                                  </div>
+                          </form>
+                          </div>
+                        </div>
+                      </div>
+                      </div>
                     <br>
                 {% endfor %}
             {% else %}
@@ -149,34 +169,49 @@
                         <h1 style="padding: 15px;">Chưa có bài viết nào</h1>
                     </div>
             {% endif %}
+            </div>
         </div>
-    </main>
-    <footer class="fixed-bottom text-center" style="margin-bottom: 10px;">
-        Copyright
-    </footer>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-              <h5 class="title is-4">Đăng bài</h5>
-                  <form action="/create/post/" enctype="multipart/form-data" method="post">
-                    {% csrf_token %}
-                      <textarea class="form-control shadow" name="content" id="content" cols="100" rows="10" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
-                      <br>
-                      <select class="form-select" name="subject">
-                        {% for subject in subjects %}
-                        <option value="{{subject.id}}">{{subject.name}}</option>
-                        {% endfor %}
-                      </select>
-                      <br>
-                      <button class="btn shadow btn-success w-100">Đăng</button>
-                  </form>
+    </div>
+    <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">Hỏi GPTeen</h1>
+                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
+                                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+            </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 class="title is-1 text-dark text-center">Đăng bài</h5>
+                    <form action="/create/post/" enctype="multipart/form-data" method="post">
+                      {% csrf_token %}
+                        <textarea class="form-control shadow" name="content" id="content" cols="100" rows="10" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
+                        <br>
+                        <select class="form-select" name="subject">
+                          {% for subject in subjects %}
+                          <option value="{{subject.id}}">{{subject.name}}</option>
+                          {% endfor %}
+                        </select>
+                        <br>
+                        <button class="btn shadow btn-success w-100">Đăng</button>
+                    </form>
+            </div>
+          </div>
+        </div>
+      </div>
 </body>
 </html>

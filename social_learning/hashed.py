@@ -1,5 +1,5 @@
 import hashlib
-from eth_account import Account
+# from eth_account import Account
 import secrets
 
 
@@ -33,6 +33,7 @@ def hashed(text):
     return chuoi
 
 
+"""
 def create_private_key():
     private_key = "0x" + secrets.token_hex(32)
     return private_key
@@ -41,3 +42,4 @@ def create_private_key():
 def create_account(private_key):
     account = Account.from_key(private_key)
     return account.address
+"""

@@ -59,31 +59,16 @@
                         <p>Lưu ý: Câu trả lời của GPTeen vẫn có thể có sai số. Hãy cân nhắc thật kỹ trước khi sử dụng</p>
                     </div>
                 </div>
-                  <div class="card rounded shadow-lg" style="padding: 10%;">
-                      <div class="card-body">
-                        {% if status != "Công khai" %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Đợi chúng mình xem qua tý nha. Trong lúc đó sao ko khám phá BDTeen</p>
-                         <!-- <a href="" class="link-primary align-items-center text-center">Về BDTeen check</a> -->
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                           <a href="{% url 'post' %}" class="btn btn-outline-primary w-100">Khám phá các bài viết tuyệt vời khác nào</a>
-                          </div>
-                         </div>
-                         {% else %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Trở lại xem kết quả nào. Hãy reload lại nếu không thấy bài viết nhé</p>
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                            <input type=button value="Khám phá các bài viết tuyệt vời khác nào" class="btn btn-primary w-100" onClick="javascript:history.go(-1);"></a>
-                          </div>
-                         </div>
-                         {% endif %}
-                      </div>
-                  </div>
-              </div>
+                <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
+                    <div style="padding: 30px;">
+                        <p>{{result}}</p>
+                    </div>
+                </div>
+                <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
+                    <div style="padding: 30px;">
+                        <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen thêm</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

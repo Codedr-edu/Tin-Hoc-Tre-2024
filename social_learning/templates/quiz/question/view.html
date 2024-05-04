@@ -55,35 +55,60 @@
             <div class="column">
                 <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <h1>GPTeen Answer</h1>
-                        <p>Lưu ý: Câu trả lời của GPTeen vẫn có thể có sai số. Hãy cân nhắc thật kỹ trước khi sử dụng</p>
+                        <h1>Câu hỏi số: {{question.number}}</h1>
+                        <p>{{question.name}}</p>
                     </div>
                 </div>
-                  <div class="card rounded shadow-lg" style="padding: 10%;">
-                      <div class="card-body">
-                        {% if status != "Công khai" %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Đợi chúng mình xem qua tý nha. Trong lúc đó sao ko khám phá BDTeen</p>
-                         <!-- <a href="" class="link-primary align-items-center text-center">Về BDTeen check</a> -->
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                           <a href="{% url 'post' %}" class="btn btn-outline-primary w-100">Khám phá các bài viết tuyệt vời khác nào</a>
-                          </div>
-                         </div>
-                         {% else %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Trở lại xem kết quả nào. Hãy reload lại nếu không thấy bài viết nhé</p>
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                            <input type=button value="Khám phá các bài viết tuyệt vời khác nào" class="btn btn-primary w-100" onClick="javascript:history.go(-1);"></a>
-                          </div>
-                         </div>
-                         {% endif %}
-                      </div>
-                  </div>
-              </div>
+                <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
+                    <div style="padding: 30px;">
+                        <form enctype="multipart/form-data" method="post">
+                            {% csrf_token %}
+                            <div class="columns">
+                                <div class="column">
+                                    <div class="d-flex">
+                                        <input type="radio" class="form-check-input" value="{{question.a}}" style="margin-right: 10px;" name="answer"/> {{question.a}}
+                                    </div>
+                                </div>
+                                <div class="column">
+                                    <div class="d-flex">
+                                        <input type="radio" class="form-check-input" value="{{question.b}}" style="margin-right: 10px;" name="answer"/> {{question.b}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="columns">
+                                <div class="column">
+                                    <div class="d-flex">
+                                        <input type="radio" class="form-check-input" value="{{question.c}}" style="margin-right: 10px;" name="answer"/> {{question.c}}
+                                    </div>
+                                </div>
+                                <div class="column">
+                                    <div class="d-flex">
+                                        <input type="radio" class="form-check-input" value="{{question.d}}" style="margin-right: 10px;" name="answer"/> {{question.d}}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="columns">
+                                <div class="column">
+                                    <button type="submit" class="button is-success is-fullwidth">Nộp</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                {% if bio == question.quiz.user %}
+                <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
+                    <div style="padding: 30px;">
+                        <div class="columns">
+                            <div class="column">
+                                <a class="button is-primary w-100 shadow-lg" style="text-decoration: none;">Chỉnh sửa câu hỏi</a>
+                            </div>
+                            <div class="column">
+                                <a class="button is-danger w-100 shadow-lg" style="text-decoration: none;">Xóa câu hỏi</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

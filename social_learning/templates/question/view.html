@@ -1,79 +1,69 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color: white;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
 </head>
-<body>
-    <header class="bg-light">
-        <div class="px-3 py-2 bg-dark text-white">
-            <div class="container">
-              <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                  <h1>Alclub</h1>
-                </a>
-      
-                <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-                  <li>
-                    <a href="{% url 'post' %}" class="nav-link text-white">
-                      <i class="bi bi-people"></i>
-                      Cộng Đồng
-                    </a>
-                  </li>
-                  <li>
-                    <a href="{% url 'question' %}" class="nav-link text-secondary">
-                      <i class="bi bi-question-circle"></i>
-                      Hỏi & Đáp
-                    </a>
-                  </li>
-                  <li>
-                    <a href="{% url 'document' %}" class="nav-link text-white">
-                      <i class="bi bi-file-earmark"></i>
-                      Tài Liệu
-                    </a>
-                  </li>
-                  <li>
-                    <div class="dropdown">
-                      <button class="nav-link text-white dropdown-toggle" style="border: none;background-color: transparent;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="bi bi-person-circle"></i> Tài Khoản
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
-                        <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
-                        {% if bio.user.is_staff %}
-                        <li><a href="{% url 'staff_index' %}" class="dropdown-item">Trang Quản Trị Viên</a></li>
-                        {% endif %}
-                        <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
-                      </ul>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <div class="px-3 py-2 shadow mb-3">
-            <div class="container rows flex-wrap justify-content-center" style="display: flex;">
-              <div class="col-12 col-lg-auto mb-2 mb-lg-0 me-lg-auto">
-                <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
-              </div>
-
-              <div class="text-end justify-content-end align-items-end">
-                {% if bio == post.user %}
-                    <a href="{% url 'delete_question' id=post.id %}" class="btn btn-danger"><i class="bi bi-x-lg"></i></a>
-                {% endif %}
-              </div>
-            </div>
-          </div>
-    </header>
-    <main>
+<body class="background-color:white;">
+    <nav class="navbar sticky-top bg-dark text-light">
         <div class="container">
-            <br>
-            <h1 class="title is-1">{{post.title}}</h1>
+            <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+          <div class="text-end justify-content-end align-items-end">
+            <div class="columns">
+                <div class="column w-100">
+                    <a class="btn btn-primary btn-lg" style="width:150px;">Điểm: {{bio.balance}}</a>
+                </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    <div class="container">
+        <div class="columns h-100" style="margin-top:15px;">
+            <div class="column is-one-quarter">
+                <div style="position: sticky;position: -webkit-sticky;z-index: 1; /* Stay on top */
+                top: 0; /* Stay at the top */
+                left: 0;">
+                <a href="{% url 'question' %}" class="link-success">Quay lại</a>
+                    <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
+                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
+                <b>Phần thưởng</b>
+                <br>
+                <button class="button is-large is-info is-fullwidth is-fullheight"> {{post.price}} Teen</button>
+                <br>
+                {% if bio != post.user %}
+                <b>Báo cáo bài viết</b>
+                <br>
+                <a class="button is-large is-danger is-fullwidth" href="{% url 'down_question' id=post.id %}">Báo cáo bài viết</a>
+                <br>
+                {% else %}
+                <b>Xóa bài</b>
+                <br>
+                <a class="button is-large is-danger is-fullwidth" href="{% url 'delete_question' id=post.id %}">Xóa bài viết</a>
+                <br>
+                {% endif %}
+                <b>Thông tin</b>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Khối Lớp: {{post.grade}}</li>
+                  <li class="list-group-item">Học Vấn: {{post.edu_rank.name}}</li>
+                  <li class="list-group-item">Môn Học: {{post.subject.name}}</li>
+                </ul>
+                <b>Khác</b>
+                <ul style="padding-top: 5px;">
+                  {% if bio.user.is_staff %}
+                    <li><a href="{% url 'staff_index' %}" class="button is-success is-rounded is-fullwidth" style="text-decoration: none;">Trang Quản Trị Viên</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
+                    <li style="margin-top: 10px;"><a class="button is-warning is-rounded is-fullwidth" style="text-decoration: none;">Hỗ trợ & Báo cáo sự cố kỹ thuật</a></li>
+                </ul>
+                </div>
+            </div>
+            <div class="column">
+              <h1 class="title is-1 text-dark">{{post.title}}</h1>
             <div class="bg-secondary w-100 rounded" style="height: 3px; margin-top: 10px;margin-bottom: 10px;"></div>
             <p>{{post.description}}</p>
             <h3>Phần thưởng lên đến: {{post.price}} Teen</h3>
@@ -139,7 +129,7 @@
                             <div class="row">
                                 <div class="col-lg align-self-start">
                                     <div class="d-flex">
-                                      <h4>{{answer.content}}</h4> {% if answer.choosen == 1 and post.answered == 1 %} <span class="bg-primary rounded" style="padding: 3px;">Check</span> {% else %} {% endif %}
+                                      <h4>{{answer.content}}</h4> {% if answer.choosen == 1 and post.answered == 1 %} <span class="bg-primary text-light rounded" style="padding: 3px;">Check</span> {% else %} {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-lg align-self-end">
@@ -158,7 +148,7 @@
                                                       <div class="d-lg-flex">
                                                         <button class="btn btn-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Tôi cần suy nghĩ thêm</button>
                                                         {% if post.price > 0 %}
-                                                          <a class="btn btn-success" href="{% url 'pay_question' id=answer.id %}">Tôi chắc chắn</a>
+                                                          <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#check_code">Tôi chắc chắn</a>
                                                         {% else %}
                                                           <a class="btn btn-success" href="{% url 'check_question' id=answer.id %}">Tôi chắc chắn</a>
                                                         {% endif %}
@@ -168,6 +158,29 @@
                                                 </div>
                                               </div>
                                             </div>
+                                            <div class="modal fade" id="check_code" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                              <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                  <div class="modal-header">
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                  </div>
+                                                  <div class="modal-body">
+                                                    <h1>Nhập pincode bảo mật</h1>
+                                                      <form action="{% url 'pay_question' id=answer.id %}" method="post" enctype="multipart/form-data">
+                                                        {% csrf_token %}
+                                                          <div class="row w-100">
+                                                              <div class="col-lg align-self-center w-100">
+                                                                  <div class="d-lg-flex w-100">
+                                                                      <input placeholder="Nhập pincode" type="number" maxlength="6" minlength="6" name="code" class="form-control w-100" style="margin-right: 10px;">
+                                                                      <button type="submit" class="btn btn-success"><i class="bi bi-send"></i></button>
+                                                                  </div>
+                                                              </div>
+                                                          </div>
+                                                  </form>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              </div>
                                         {% elif post.user != bio and answer.user == bio %}
                                         <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
                                         <div class="modal fade" id="delete_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -217,4 +230,25 @@
                 {% else %}
                 <p class="text-center">Chưa có bình luận nào</p>
             {% endif %}
+  
+        </div>
+    </div>
+      <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">Hỏi GPTeen</h1>
+                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
+                                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
 </body>
+</html>

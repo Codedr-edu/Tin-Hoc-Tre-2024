@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404, get_list_or_40
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import *
-from .hashed import hashed, create_private_key, create_account
+from .hashed import hashed
 from django.views import generic
 from django.urls import reverse
 from django.contrib.auth.models import User
@@ -18,19 +18,21 @@ from django.apps import AppConfig
 import random
 from django.db.models import Q
 import datetime
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
 import json
 import hashlib
 import os
+from .GPTsearch import GPTeen
+from .GPTsecurity import check_document, check_image, check_content
+import random
 
+'''
 web3 = Web3(Web3.HTTPProvider(
     'https://sepolia.infura.io/v3/8c4c9235b7ed489ab0bc8c26795ae24e'))
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 abi = json.loads('[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"tokens","type":"uint256"}],"name":"approve","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"from","type":"address"},{"name":"to","type":"address"},{"name":"tokens","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"tokenOwner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"a","type":"uint256"},{"name":"b","type":"uint256"}],"name":"safeSub","outputs":[{"name":"c","type":"uint256"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":false,"inputs":[{"name":"to","type":"address"},{"name":"tokens","type":"uint256"}],"name":"transfer","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"a","type":"uint256"},{"name":"b","type":"uint256"}],"name":"safeDiv","outputs":[{"name":"c","type":"uint256"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":true,"inputs":[{"name":"a","type":"uint256"},{"name":"b","type":"uint256"}],"name":"safeMul","outputs":[{"name":"c","type":"uint256"}],"payable":false,"stateMutability":"pure","type":"function"},{"constant":true,"inputs":[{"name":"tokenOwner","type":"address"},{"name":"spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"a","type":"uint256"},{"name":"b","type":"uint256"}],"name":"safeAdd","outputs":[{"name":"c","type":"uint256"}],"payable":false,"stateMutability":"pure","type":"function"},{"inputs":[],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"tokens","type":"uint256"}],"name":"Transfer","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"tokenOwner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"tokens","type":"uint256"}],"name":"Approval","type":"event"}]')
 contract = web3.eth.contract(
     address='0x2519019C7251545be7B81521951874B2c4948A56', abi=abi)
-
+'''
 # authenticated
 
 
@@ -68,11 +70,10 @@ def Signup(request):
             user = User.objects.get(username=username)
             edu = Education_rank.objects.get(id=education_rank)
             if user and edu:
-                key = create_private_key()
-                wallet = create_account(key)
+                # key = create_private_key()
                 passcode = hashed(passcode)
                 bio = Bio(user=user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu,
-                          description=description, address=wallet, address_password=key, wallet_passcode=passcode)
+                          description=description, balance=1000, wallet_passcode=passcode)
                 bio.save()
                 login(request, user,
                       backend='django.contrib.auth.backends.ModelBackend')
@@ -100,12 +101,12 @@ def check(request):
 
                 edu = Education_rank.objects.get(id=education_rank)
 
-                key = create_private_key()
-                wallet = create_account(key)
+                # key = create_private_key()
+                # wallet = create_account(key)
 
                 passcode = hashed(passcode)
                 bio = Bio(user=request.user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu, deleted=0,
-                          description=description, address=wallet, address_password=key, wallet_passcode=passcode)
+                          description=description, balance=1000, wallet_passcode=passcode)
                 bio.save()
                 return redirect('post')
     else:
@@ -130,8 +131,6 @@ def index(request):
 def question_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
-        teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         edu_rank = Education_rank.objects.all()
         subject = Subject.objects.all()
@@ -158,7 +157,7 @@ def question_list_view(request):
             post = Question.objects.filter(
                 grade__lte=bio.grade, education_rank=bio.edu_rank, status="Công khai").all()
 
-        context = {"posts": post[::-1], 'teen': teen, "bio": bio,
+        context = {"posts": post[::-1], "bio": bio,
                    'subjects': subject, 'educations': edu_rank}
     else:
         return redirect("index")
@@ -168,8 +167,6 @@ def question_list_view(request):
 def document_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
-        teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         edu_rank = Education_rank.objects.all()
         subject = Subject.objects.all()
@@ -196,7 +193,7 @@ def document_list_view(request):
             post = Document.objects.filter(
                 grade__lte=bio.grade, edu_rank=bio.edu_rank, status="Công khai").all()
 
-        context = {"posts": post[::-1], 'teen': teen, "bio": bio,
+        context = {"posts": post[::-1], "bio": bio,
                    'subjects': subject, 'educations': edu_rank}
     else:
         return redirect("index")
@@ -226,10 +223,7 @@ def post_list_view(request):
         else:
             post = Post.objects.filter(subject=s2, status="Công khai").all()
 
-        teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
-        context = {"posts": post[::-1], "subjects": subject, "bio": bio,
-                   'teen': teen}
+        context = {"posts": post[::-1], "subjects": subject, "bio": bio}
     else:
         return redirect("index")
     return render(request, "post/list.html", context)
@@ -241,20 +235,24 @@ def post_list_view(request):
 def post_create(request):
     if request.user.is_authenticated:
         user = Bio.objects.filter(user=request.user).first()
+        bad = bad_keyword.objects.filter(status="Cấm").all()
         if request.method == "POST":
             content = request.POST.get("content")
             subject = Subject.objects.filter(
                 id=request.POST.get("subject")).first()
 
-            if user.user.is_staff:
-                status = "Công khai"
-            else:
-                status = "Chờ kiểm duyệt"
+            check = "Công khai"
+            check_cnt = check_content(content)
+            fail = "có nội dung nhạy cảm"
+            if check_cnt == fail:
+                check = "Chờ kiểm duyệt"
+
+            status = check
 
             sql = Post(content=content, user=user, subject=subject,
                        status=status, comment_counter=0)
             sql.save()
-            return redirect("success")
+            return redirect("success", status=sql.status)
     else:
         return redirect("index")
 
@@ -275,15 +273,21 @@ def document_create(request):
             edu_rank = Education_rank.objects.get(id=edu_rank)
             subject = Subject.objects.get(id=subject)
 
-            if user.user.is_staff:
-                status = "Công khai"
-            else:
-                status = "Chờ kiểm duyệt"
-
-            sql = Document(title=title, description=description, file=file, image=image, status=status,
+            sql = Document(title=title, description=description, file=file, image=image, status="Chờ kiểm duyệt",
                            grade=grade, edu_rank=edu_rank, user=user, price=price, subject=subject, comment_counter=0)
             sql.save()
-            return redirect("success")
+            # sql = Document.objects.filter()
+
+            check_doc = check_document(sql.file.url)
+            check_img = check_image(sql.image.url)
+            check_title = check_content(sql.title)
+            check_description = check_content(sql.description)
+            fail = "có nội dung nhạy cảm"
+            if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
+                sql.status = "Công khai"
+                sql.save()
+
+            return redirect("success", status=sql.status)
     else:
         return redirect("index")
 
@@ -301,25 +305,130 @@ def question_create(request):
             subject = request.POST.get("subject")
             price = int(request.POST.get("price"))
 
-            if user.user.is_staff:
-                status = "Công khai"
-            else:
-                status = "Chờ kiểm duyệt"
-
             edu_rank = Education_rank.objects.filter(id=edu_rank).first()
             subject = Subject.objects.filter(id=subject).first()
 
-            sql = Question(title=title, description=description, price=price, file=file, status=status,
+            sql = Question(title=title, description=description, price=price, file=file, status="Chờ kiểm duyệt",
                            subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0)
             sql.save()
 
-            return redirect("success")
+            check_doc = check_document(sql.file.url)
+            check_img = check_image(sql.image.url)
+            check_title = check_content(sql.title)
+            check_description = check_content(sql.description)
+            fail = "có nội dung nhạy cảm"
+            if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
+                sql.status = "Công khai"
+                sql.save()
+
+            return redirect("success", status=sql.status)
     else:
         return redirect("index")
 
 
 # payment_api
+def question_payment(request, id):
+    if request.user.is_authenticated:
+        answer = Answer.objects.filter(id=id).first()
+        question = Question.objects.filter(id=answer.question.id).first()
+        if request.method == "POST" and question:
+            code = request.POST.get("code")
 
+            final = hashed(code)
+            if final != "ValueError: The passcode just contain only number from 0 to 9":
+                bio = Bio.objects.filter(
+                    wallet_passcode=final, user=request.user).first()
+                honor_set = hornorable.objects.filter(user=answer.user).count()
+                if final == bio.wallet_passcode and bio.balance >= question.price and question.answered != 1:
+                    answer.user.balance += question.price
+                    bio.balance -= question.price
+                    answer.user.save()
+                    bio.save()
+                    if answer.user.balance >= 10**(honor_set+1):
+                        content = "Bạn", answer.user.user.username, "đã đạt mức điểm", 10**(
+                            honor_set+1)
+                        honor = hornorable(
+                            goal=10**(honor_set+1), content=content, user=answer.user, status="Chờ xử lý")
+                        honor.save()
+                    return redirect("question_bill", id=id)
+                else:
+                    return redirect("all_error")
+            else:
+                return redirect("all_error")
+    else:
+        return redirect("index")
+
+
+def document_payment(request, id):
+    if request.user.is_authenticated:
+        document = Document.objects.filter(id=id).first()
+        if request.method == "POST":
+            code = request.POST.get("code")
+
+            final = hashed(code)
+            if final != "ValueError: The passcode just contain only number from 0 to 9":
+                bio = Bio.objects.filter(
+                    wallet_passcode=final, user=request.user).first()
+                honor_set = hornorable.objects.filter(
+                    user=document.user).count()
+                if final == bio.wallet_passcode and bio.balance >= document.price:
+                    document.user.balance += document.price
+                    bio.balance -= document.price
+                    document.user.save()
+                    bio.save()
+                    sql = have_buy_document(document=document, user=bio)
+                    sql.save()
+                    if answer.user.balance >= 10**(honor_set+1):
+                        content = "Bạn", document.user.user.username, "đã đạt mức điểm", 10**(
+                            honor_set+1)
+                        honor = hornorable(
+                            goal=10**(honor_set+1), content=content, user=document.user, status="Chờ xử lý")
+                        honor.save()
+                    return redirect("document_bill", id=id)
+                else:
+                    return redirect("all_error")
+            else:
+                return redirect("all_error")
+    else:
+        return redirect("index")
+
+
+def post_payment(request, id):
+    if request.user.is_authenticated:
+        document = Post.objects.filter(id=id).first()
+        if request.method == "POST":
+            value = float(request.POST.get("value"))
+            code = request.POST.get("code")
+
+            final = hashed(code)
+            if final != "ValueError: The passcode just contain only number from 0 to 9":
+                bio = Bio.objects.filter(
+                    wallet_passcode=final, user=request.user).first()
+                honor_set = hornorable.objects.filter(
+                    user=document.user).count()
+                if final == bio.wallet_passcode and bio.balance >= value:
+                    document.user.balance += value
+                    bio.balance -= value
+                    document.user.save()
+                    bio.save()
+                    if answer.user.balance >= 10**(honor_set+1):
+                        content = "Bạn", document.user.user.username, "đã đạt mức điểm", 10**(
+                            honor_set+1)
+                        honor = hornorable(
+                            goal=10**(honor_set+1), content=content, user=document.user, status="Chờ xử lý")
+                        honor.save()
+                    goal = "/bill/post/"+str(id)+"/value/"+str(int(value))
+                    return redirect(goal)
+                else:
+                    return redirect("all_error")
+            else:
+                return redirect("all_error")
+    else:
+        return redirect("index")
+    return render(request, "post/code_submit.html")
+
+
+'''
 
 def question_payment(request, id):
     if request.user.is_authenticated:
@@ -513,6 +622,8 @@ def eth_transfer(request, id):
             else:
                 return redirect("index")
 
+
+'''
 # like_api
 
 
@@ -664,14 +775,18 @@ def comment_post(request, id):
     if request.user.is_authenticated:
         post = Post.objects.filter(id=id).first()
         bio = Bio.objects.filter(user=request.user).first()
+        bad = bad_keyword.objects(status="Cấm").all()
         if post and bio:
             if request.method == "POST":
                 content = request.POST.get("content")
 
-                if request.user.is_staff:
-                    status = "Công khai"
-                else:
-                    status = "Chờ kiểm duyệt"
+                check = "Công khai"
+                check_cnt = check_content(content)
+                fail = "có nội dung nhạy cảm"
+                if check_cnt == fail:
+                    check = "Chờ kiểm duyệt"
+
+                status = check
 
                 sql = Comment_Post(post=post, user=bio,
                                    content=content, status=status)
@@ -679,7 +794,7 @@ def comment_post(request, id):
                 post.comment_counter += 1
                 post.save()
 
-                return redirect("success")
+                return redirect("success", status=status)
         else:
             return redirect("read_post", id=id)
     else:
@@ -690,24 +805,25 @@ def comment_document(request, id):
     if request.user.is_authenticated:
         post = Document.objects.filter(id=id).first()
         bio = Bio.objects.filter(user=request.user).first()
+        bad = bad_keyword.objects.filter(status="Cấm").all()
         if post and bio:
             if request.method == "POST":
                 content = request.POST.get("content")
 
-                if request.user.is_staff:
-                    status = "Công khai"
-                else:
-                    status = "Chờ kiểm duyệt"
+                check = "Công khai"
+                check_cnt = check_content(content)
+                fail = "có nội dung nhạy cảm"
+                if check_cnt == fail:
+                    check = "Chờ kiểm duyệt"
+
+                status = check
 
                 sql = Comment_Document(
                     post=post, user=bio, content=content, status=status)
                 sql.save()
-
-                sql = Comment_Document.objects.filter(
-                    post=post, user=bio, content=content).first()
-                return redirect("success")
+                return redirect("success", status=status)
         else:
-            return redirect("gig_view", id=id)
+            return redirect("document_view", id=id)
     else:
         return redirect("index")
 
@@ -722,16 +838,19 @@ def answer(request, id):
                 file = request.FILES.get("file")
                 image = request.FILES.get("image")
 
-                if request.user.is_staff:
-                    status = "Công khai"
-                else:
-                    status = "Chờ kiểm duyệt"
-
-                sql = Answer(question=post, user=bio, status=status,
+                sql = Answer(question=post, user=bio, status="Chờ kiểm duyệt",
                              content=content, image=image, file=file, choosen=0)
                 sql.save()
 
-                return redirect("success")
+                check_cnt = check_content(content)
+                check_img = check_image(sql.image.url)
+                check_doc = check_document(sql.file.url)
+                fail = "có nội dung nhạy cảm"
+                if check_cnt != fail and check_img != fail and check_doc != fail:
+                    sql.status = "Công khai"
+                    sql.save()
+
+                return redirect("success", status=sql.status)
         else:
             return redirect("read_question", id=id)
     else:
@@ -937,9 +1056,7 @@ def question_view(request, id):
         noti = Answer.objects.filter(
             question=question, status="Công khai").all()
         bio = Bio.objects.filter(user=request.user).first()
-        teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
-        context = {'post': question, "answers": noti, "bio": bio, "teen": teen}
+        context = {'post': question, "answers": noti, "bio": bio}
     else:
         return redirect('a_login')
     return render(request, 'question/view.html', context)
@@ -953,10 +1070,8 @@ def document_view(request, id):
             document=document, user=bio).first()
         noti = Comment_Document.objects.filter(
             post=document, status="Công khai").all()
-        teen = float(Web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
         context = {'post': document, "comments": noti,
-                   'check': check, "teen": teen, "bio": bio}
+                   'check': check, "bio": bio}
     else:
         return redirect('a_login')
     return render(request, 'document/view.html', context)
@@ -1074,11 +1189,8 @@ def user_profile(request, id):
             question = Question.objects.filter(
                 user=bio, status="Công khai").last()
 
-            teen = float(web3.to_wei(
-                contract.functions.balanceOf(your_bio.address).call(), 'ether'))
-
             context = {'user': your_bio, 'document': document,
-                       'post': post, 'question': question, 'teen': teen, 'bio': bio}
+                       'post': post, 'question': question, 'bio': bio}
     else:
         return redirect("index")
     return render(request, "user/user_profile.html", context)
@@ -1089,10 +1201,6 @@ def your_profile(request):
         bio = Bio.objects.filter(user=request.user).first()
 
         # balanced
-        eth_balanced = float(web3.to_wei(
-            web3.eth.get_balance(bio.address), 'wei') / 1000000000000000000)
-        teen_balanced = float(web3.to_wei(
-            contract.functions.balanceOf(bio.address).call(), 'wei') / 1000000000000000000)
 
         # other
         document = Document.objects.filter(user=bio, status="Công khai").last()
@@ -1100,7 +1208,7 @@ def your_profile(request):
         question = Question.objects.filter(user=bio, status="Công khai").last()
 
         context = {'user': bio, 'document': document, 'post': post,
-                   'question': question, 'eth': eth_balanced, 'teen': teen_balanced}
+                   'question': question}
     else:
         return redirect("index")
     return render(request, "user/your_profile.html", context)
@@ -1175,10 +1283,9 @@ def staff_index(request):
             status="Chờ kiểm duyệt").count()
         comment_document = Comment_Document.objects.filter(
             status="Chờ kiểm duyệt").count()
+        # honor = hornorable
         answer = Answer.objects.filter(status="Chờ kiểm duyệt").count()
-        teen = contract.functions.balanceOf(
-            bio.address).call() / 1000000000000000000
-        context = {"post": post, "question": question, "document": document, "teen": teen,
+        context = {"post": post, "question": question, "document": document,
                    "comment_post": comment_post, "comment_document": comment_document, "answer": answer}
     else:
         return redirect("check")
@@ -1187,7 +1294,7 @@ def staff_index(request):
 
 def staff_post_list(request):
     if request.user.is_authenticated and request.user.is_staff:
-        post = Post.objects.filter(status="Chờ kiểm duyệt").all()
+        post = Post.objects.all()
         context = {"posts": post}
     else:
         return redirect("check")
@@ -1196,7 +1303,7 @@ def staff_post_list(request):
 
 def staff_question_list(request):
     if request.user.is_authenticated and request.user.is_staff:
-        post = Question.objects.filter(status="Chờ kiểm duyệt").all()
+        post = Question.objects.all()
         context = {"questions": post}
     else:
         return redirect("check")
@@ -1205,7 +1312,7 @@ def staff_question_list(request):
 
 def staff_document_list(request):
     if request.user.is_authenticated and request.user.is_staff:
-        post = Document.objects.filter(status="Chờ kiểm duyệt").all()
+        post = Document.objects.all()
         context = {"documents": post}
     else:
         return redirect("check")
@@ -1717,9 +1824,9 @@ def question_bill(request, id):
     return render(request, "question/bill.html", context)
 
 
-def success(request):
+def success(request, status):
     if request.user.is_authenticated:
-        return render(request, "success.html")
+        return render(request, "success.html", context={"status": status})
     else:
         return redirect("check")
 
@@ -1738,3 +1845,292 @@ def check_question(request, id):
             return redirect("all_error")
     else:
         return redirect("check")
+
+# GPTeen
+
+
+def gpteen_input(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if bio.balance >= 100 and request.method == "POST":
+            prompt = request.POST.get("gpteen")
+            return redirect("gpteen_answer", prompt=prompt)
+    else:
+        return redirect("index")
+
+
+def gpteen_answer(request, prompt):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if bio.balance >= 100 and prompt:
+            bio.balance -= 100
+            bio.save()
+            result = GPTeen(prompt=prompt)
+            context = {"result": result, "bio": bio}
+        else:
+            return redirect("all_error")
+    else:
+        return redirect("all_error")
+    return render(request, "GPTeen/result.html", context)
+
+# quản lý từ khóa bẩn
+
+
+def add_bad_keyword(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        keyword = request.POST.get("keyword")
+
+        new_keyword = bad_keyword(keyword=keyword, status="Cấm")
+        new_keyword.save()
+    else:
+        return redirect("index")
+    return render(request, "staff/bad_word.html")
+
+
+def staff_check_all_bad_keyword(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        bad = bad_keyword.objects.all()
+        bio = Bio.objects.filter(user=request.user).first()
+        context = {"posts": bad, "bio": bio}
+    else:
+        return redirect("index")
+    return render(request, "staff/view/bad_word.html", context)
+
+
+def staff_ban_suggest_bad_keyword(request, keyword):
+    if request.user.is_authenticated and request.user.is_staff:
+        bad = bad_keyword.objects.filter(
+            keyword=keyword, status="Chờ xem xét").first()
+        bad.status = "Cấm"
+        bad.save()
+        # bio = Bio.objects.filter(user=request.user).first()
+    else:
+        return redirect("index")
+
+
+def staff_delete_suggest_bad_keyword(request, keyword):
+    if request.user.is_authenticated and request.user.is_staff:
+        bad = bad_keyword.objects.filter(
+            keyword=keyword, status="Chờ xem xét").first()
+        bad.delete()
+        # bio = Bio.objects.filter(user=request.user).first()
+    else:
+        return redirect("index")
+
+
+def staff_delete_ban_bad_keyword(request, keyword):
+    if request.user.is_authenticated and request.user.is_staff:
+        bad = bad_keyword.objects.filter(keyword=keyword, status="Cấm").first()
+        bad.delete()
+        # bio = Bio.objects.filter(user=request.user).first()
+    else:
+        return redirect("index")
+
+
+def suggest_bad_keyword(request):
+    if request.user.is_authenticated:
+        keyword = request.POST.get("keyword")
+
+        new_keyword = bad_keyword(keyword=keyword, status="Chờ xem xét")
+        new_keyword.save()
+    else:
+        return redirect("index")
+    return render(request, "user/bad_word.html")
+
+
+# vinh danh
+def user_honor(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        honor = hornorable.objects.filter(user=bio).all()
+        context = {"bio": bio, "honor": honor[::-1]}
+    else:
+        return redirect("index")
+    return render(request, "user/honor.html", context)
+
+
+def staff_all_honor(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        honor = hornorable.objects.all()
+        context = {"bio": bio, "posts": honor[::-1]}
+    else:
+        return redirect("index")
+    return render(request, "staff/view/honor.html", context)
+
+
+def staff_check_honor(request, id):
+    if request.user.is_authenticated:
+        honor = hornorable.objects.filter(id=id).first()
+        honor.status = "Đã vinh danh"
+        honor.save()
+        return redirect("staff_honor")
+    else:
+        return redirect("index")
+
+# quiz
+
+
+def make_quiz(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        subject = Subject.objects.all()
+        edu_rank = Education_rank.objects.all()
+        if request.method == "POST":
+            title = request.POST.get("title")
+            description = request.POST.get("description")
+            number_of_question = request.POST.get("number_of_question")
+            grade = request.POST.get("grade")
+            subject = request.POST.get("subject")
+            edu_rank = request.POST.get("edu_rank")
+            image = request.FILES.get("image")
+
+            bio = Bio.objects.filter(user=request.user).first()
+            subject = Subject.objects.filter(id=subject).first()
+            edu_rank = Education_rank.objects.filter(id=edu_rank).first()
+            sql = Quiz(name=title, description=description, grade=grade, number_of_question=number_of_question,
+                       subject=subject, edu_rank=edu_rank, image=image, user=bio)
+            sql.save()
+            return redirect("make_question", quiz_id=sql.id, ques_no=1)
+    else:
+        return redirect("index")
+    return render(request, "quiz/create.html", context={"subjects": subject, "edu_ranks": edu_rank})
+
+
+def make_question(request, quiz_id, ques_no):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        quiz = Quiz.objects.filter(id=quiz_id).first()
+        if quiz.user == bio:
+            ques = Quiz_questions.objects.filter(
+                quiz=quiz, number=ques_no).first()
+            if ques:
+                return redirect("edit_question", quiz_id=quiz_id, ques_no=ques_no)
+            else:
+                if request.method == "POST":
+                    name = request.POST.get("title")
+                    a = request.POST.get("ans_a")
+                    b = request.POST.get("ans_b")
+                    c = request.POST.get("ans_c")
+                    d = request.POST.get("ans_d")
+                    correct_answer = request.POST.get("correct_answer")
+
+                    sql = Quiz_questions(
+                        name=name, number=ques_no, quiz=quiz, a=a, b=b, c=c, d=d, correct=correct_answer)
+                    sql.save()
+
+                    if ques_no == quiz.number_of_question:
+                        return redirect("quiz")
+                    else:
+                        return redirect("make_question", quiz_id=sql.id, ques_no=ques_no+1)
+        else:
+            return redirect("all_error")
+    else:
+        return redirect("index")
+    return render(request, "quiz/question/create.html")
+
+
+def edit_question(request, quiz_id, ques_no):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        quiz = Quiz.objects.filter(id=quiz_id).first()
+        if quiz.user == bio:
+            ques = Quiz_questions.objects.filter(
+                quiz=quiz, number=ques_no).first()
+            if ques:
+                if request.method == "POST":
+                    name = request.POST.get("name")
+                    a = request.POST.get("ans_a")
+                    b = request.POST.get("ans_b")
+                    c = request.POST.get("ans_c")
+                    d = request.POST.get("ans_d")
+                    correct_answer = request.POST.get("correct_answer")
+
+                    sql = Quiz_questions(
+                        name=name, number=ques_no, quiz=quiz, a=a, b=b, c=c, d=d, correct=correct_answer)
+                    sql.save()
+
+                    if ques_no == quiz.number_of_question:
+                        return redirect("quiz")
+                    else:
+                        return redirect("make_question", quiz_id=sql.id, ques_no=ques_no+1)
+            else:
+                return redirect("make_question", quiz_id=quiz_id, ques_no=ques_no)
+        else:
+            return redirect("all_error")
+    else:
+        return redirect("index")
+    return render(request, "quiz/question/create.html")
+
+
+def delete_quiz(request, id):
+    bio = Bio.objects.filter(user=request.user).first()
+    quiz = Quiz.objects.filter(id=id).first()
+    if request.user.is_authenticated and request.user.is_staff and bio == quiz.user:
+        quiz.delete()
+        return redirect("quiz")
+    else:
+        return redirect("index")
+
+
+def delete_question(request, id):
+    bio = Bio.objects.filter(user=request.user).first()
+    quiz = Quiz_questions.objects.filter(id=id).first()
+    if request.user.is_authenticated and request.user.is_staff and bio == quiz.user:
+        quiz.quiz.number_of_question -= 1
+        quiz.quiz.save()
+        quiz.delete()
+        return redirect("quiz")
+    else:
+        return redirect("index")
+
+
+def quiz_list(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        quiz = Quiz.objects.all()
+        context = {"bio": bio, "posts": quiz}
+    else:
+        return redirect("index")
+    return render(request, "quiz/list.html", context=context)
+
+
+def quiz_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        quiz = Quiz.objects.filter(id=id).first()
+        question = Quiz_questions.objects.filter(number=1, quiz=quiz).first()
+        context = {"bio": bio, "post": quiz, "question": question}
+    else:
+        return redirect("index")
+    return render(request, "quiz/view.html", context)
+
+
+def quiz_question_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        ques = Quiz_questions.objects.filter(id=id).first()
+        context = {"bio": bio, "question": ques}
+        if request.method == "POST":
+            answer = request.POST.get("answer")
+            check = "Sai"
+            plus = 0
+            if answer == ques.correct:
+                check = "Đúng"
+                plus = random.randint(1, 100)
+                bio.balance += plus
+                bio.save()
+            return redirect("quiz_question_after_view", status=check, point=plus, id=id)
+    else:
+        return redirect("index")
+    return render(request, "quiz/question/view.html", context=context)
+
+
+def quiz_question_after_view(request, status, point, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        ques = Quiz_questions.objects.filter(id=id).first()
+        context = {"bio": bio, "status": status,
+                   "point": point, "next_question": ques.number+1, "ques": ques}
+    else:
+        return redirect("index")
+    return render(request, "quiz/question/result.html", context=context)

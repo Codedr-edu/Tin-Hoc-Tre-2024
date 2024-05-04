@@ -144,6 +144,26 @@ urlpatterns = [
     path("bill/question/<int:id>", views.question_bill, name="question_bill"),
     path("bill/document/<int:id>", views.document_bill, name="document_bill"),
     # success
-    path("/success", views.success, name="success"),
-    path("/check/question/<int:id>", views.check_question, name="check_question")
+    path("success/<status>", views.success, name="success"),
+    path("check/question/<int:id>/", views.check_question, name="check_question"),
+    path("ask/gpteen", views.gpteen_input, name="ask_gpteen"),
+    path("result/gpteen/<prompt>", views.gpteen_answer, name="gpteen_answer"),
+    path("user/honor/", views.user_honor, name="user_honor"),
+    path("staff/honor", views.staff_all_honor, name="staff_honor"),
+    path("satff/check/honor/<int:id>",
+         views.staff_check_honor, name="staff_check_honor"),
+    path("create/quiz/", views.make_quiz, name="make_quiz"),
+    path("create/question/<int:ques_no>/quiz/<int:quiz_id>",
+         views.make_question, name="make_question"),
+    path("edit/question/<int:ques_no>/quiz/<int:quiz_id>",
+         views.edit_question, name="edit_question"),
+    path("delete/question/<int:id>/",
+         views.delete_question, name="delete_question"),
+    path("delete/quiz/<int:id>", views.delete_quiz, name="delete_quiz"),
+    path("quiz/", views.quiz_list, name="quiz"),
+    path("quiz/view/<int:id>", views.quiz_view, name="quiz_view"),
+    path("practice/question/<int:id>",
+         views.quiz_question_view, name="quiz_question_view"),
+    path("practice/after/question/<int:id>/point/<int:point>/status/<status>",
+         views.quiz_question_after_view, name="quiz_question_after_view")
 ]

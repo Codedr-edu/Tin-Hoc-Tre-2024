@@ -54,9 +54,9 @@
                 <b>Phân trang</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
                     <li><a href="{% url 'post' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
-                    <li style="margin-top: 10px;"><a href="{% url 'question' %}" class="button is-primary is-rounded is-fullwidth" style="text-decoration: none;">Hỏi đáp</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'question' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Hỏi đáp</a></li>
                     <li style="margin-top: 10px;"><a href="{% url 'document' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Tài liệu</a></li>
-                    <li style="margin-top: 10px;"><a href="{% url 'quiz' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Quiz luyện tập</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'quiz' %}" class="button is-primary is-rounded is-fullwidth" style="text-decoration: none;">Quiz luyện tập</a></li>
                 </ul>
                 <b>Về {{bio.user.username}}</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
@@ -65,7 +65,10 @@
                 </ul>
                 <b>Khác</b>
                 <ul style="padding-top: 5px;">
-                    <li><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
+                    {% if bio.user.is_staff %}
+                    <li><a href="{% url 'staff_index' %}" class="button is-success is-rounded is-fullwidth" style="text-decoration: none;">Trang Quản Trị Viên</a></li>
+                    {% endif %}
+                    <li style="margin-top: 10px;"><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
                     <li style="margin-top: 10px;"><a class="button is-warning is-rounded is-fullwidth" style="text-decoration: none;">Hỗ trợ & Báo cáo sự cố kỹ thuật</a></li>
                 </ul>
                 </div>
@@ -73,46 +76,31 @@
             <div class="column">
                 <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <h1>Trang hỏi & đáp</h1>
-                        <p>Nơi bạn có thể chia sẻ và tìm được nhiều câu hỏi và câu trả lời hay và bổ ích</p>
+                        <h1>Trang Quiz</h1>
+                        <p>Nơi bạn có thể tự luyện tập với các bộ quiz thú vị</p>
                     </div>
                 </div>
-                <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" data-bs-toggle="modal" data-bs-target="#exampleModal"  class="btn btn-info w-100">Đăng câu hỏi</a>
+                {% if bio.user.is_staff %}
+                <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" href="{% url 'make_quiz' %}">Đăng bài viết</a>
+                {% endif %}
                 {% if posts|length != 0 %}
                 {% for post in posts %}
-                    <div class="d-flex justify-content-center shadow align-items-start w-100 mx-auto card">
-                        <div class="card-header w-100">
-                            <div class="container">
-                                <div class="columns">
-                                  <div class="column">
-                                    <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;"> <a class="link-dark">   {{post.user.user.username}}</a>
-                                  </div>
+                    <div class="d-flex justify-content-center align-items-start w-100 mx-auto">
+                        <div class="card mb-3 w-100 shadow-lg">
+                            <div class="row g-0">
+                              <div class="col-md-4">
+                                <img src="{{post.image.url}}" class="img-fluid rounded-start" style="object-fit: cover;" alt="...">
+                              </div>
+                              <div class="col-md-8">
+                                <div class="card-body">
+                                  <h5 class="card-title">{{post.name}}</h5>
+                                  <p class="card-text">{{post.description}}</p>
+                                  <a href="{% url 'quiz_view' id=post.id %}" class="button is-primary is-fullwidth">Tìm hiểu thêm</a>
+                                  <p class="card-text"><small class="text-body-secondary">Quiz của {{bio.user.username}}</small></p>
                                 </div>
+                              </div>
                             </div>
-                        </div>
-                        {% if post.image %}
-                        <img src="{{post.image.url}}" class="w-100 h-50 rounded" style="object-fit: cover;" />
-                        {% endif %}
-                        <div class="card-body w-100">
-                        <a href="{% url 'question_view' id=post.id %}" class="link-dark"><h3 class="card-text text-start align-items-start">{{post.title}}</h3></a>
-                        <br>
-                        <p>Phần Thưởng Lên Đến: {{post.price}} Teen</p>
-                        <br>
-                        <div class="columns">
-                          <div class="column w-100">
-                            <a href="{% url 'like_question' id=post.id %}" class="btn btn-primary w-100"><i class="bi bi-hand-thumbs-up"></i> {{post.like.count}}</a>
                           </div>
-                          <div class="column w-100">
-                            <a href="{% url 'dislike_question' id=post.id %}" class="btn btn-danger w-100"><i class="bi bi-hand-thumbs-down"></i> {{post.dislike.count}}</a>
-                          </div>
-                          <div class="column w-100">
-                            <a href="{% url 'question_view' id=post.id %}" class="btn btn-secondary w-100"><i class="bi bi-lightbulb"></i> {{post.comment_counter}}</a>
-                          </div>
-                        </div>
-                        </div>
-                        <div class="card-footer w-100 align-items-center justify-content-center">
-                          <p class="text-center">{{post.datetime}}</p>
-                        </div>
                     </div>
                     <br>
                 {% endfor %}
@@ -148,65 +136,19 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <h5 class="title is-1 text-dark text-center">Đăng câu hỏi</h5>
-                <form action="{% url 'create_question' %}" enctype="multipart/form-data" method="post">
-                  {% csrf_token %}
-                    <div class="row">
-                      <div class="col-lg">
-                          <label>Tiêu Đề</label>
-                          <input type="text" name="title" class="form-control">
-                      </div>
-                    </div>
-                    <div class="row" style="margin-top: 10px;">
-                      <div class="col-lg">
-                        <label>Học Vấn</label>
-                        <select id="edu_rank" name="education_rank" class="form-select" required>
-                            {% for edu in educations %}
-                                <option value="{{edu.id}}">{{edu.name}}</option>
-                            {% endfor %}
+                <h5 class="title is-1 text-dark text-center">Đăng bài</h5>
+                    <form action="/create/post/" enctype="multipart/form-data" method="post">
+                      {% csrf_token %}
+                        <textarea class="form-control shadow" name="content" id="content" cols="100" rows="10" placeholder="Bạn đang nghĩ gì vậy?"></textarea>
+                        <br>
+                        <select class="form-select" name="subject">
+                          {% for subject in subjects %}
+                          <option value="{{subject.id}}">{{subject.name}}</option>
+                          {% endfor %}
                         </select>
-                    </div>
-                    <div class="col-lg">
-                        <label>Lớp</label>
-                        <input type="number" name="grade" class="form-control w-100" required>
-                    </div>
-                    </div>
-                    <div class="row" style="margin-top: 10px;">
-                      <div class="col">
-                          <label>Ảnh</label>
-                          <input type="file" name="image" class="form-control" >
-                      </div>
-                      <div class="col">
-                          <button type="button" style="background: none;border: none;" data-toggle="tooltip" data-placement="top" title="Hiện Hệ Thống Của Chúng Tôi Chưa Đủ Nhiều Để Chứa File. Xin Lỗi Vì Sự Bất Tiện Này!">File</button>
-                          <input type="file" name="file" class="form-control">
-                      </div>
-                  </div>
-                  <div class="row" style="margin-top: 10px;">
-                      <div class="col">
-                          <label>Subject</label>
-                          <select id="edu_rank" name="subject" class="form-select">
-                              {% for subject in subjects %}
-                                  <option value="{{subject.id}}">{{subject.name}}</option>
-                              {% endfor %}
-                          </select>
-                      </div>
-                      <div class="col">
-                          <label>Phần Thưởng</label>
-                          <input type="number" name="price" step="0.01" class="form-control w-100" required>
-                      </div>
-                  </div>
-                  <div class="row" style="margin-top: 10px;">
-                      <div class="col">
-                          <label>Mô Tả</label>
-                          <textarea name="description" class="form-control" rows="5" cols="5"></textarea>
-                      </div>
-                  </div>
-                  <div class="row" style="margin-top: 10px;">
-                      <div class="col">
-                          <button type="submit" class="btn btn-success w-100">Đăng</button>
-                      </div>
-                  </div>
-                </form>
+                        <br>
+                        <button class="btn shadow btn-success w-100">Đăng</button>
+                    </form>
             </div>
           </div>
         </div>

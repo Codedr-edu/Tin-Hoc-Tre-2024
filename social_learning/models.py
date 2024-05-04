@@ -19,8 +19,7 @@ class Bio(models.Model):
     twitter = models.CharField(max_length=1000, null=True, blank=True)
     zalo = models.CharField(max_length=1000, null=True, blank=True)
     grade = models.IntegerField(null=True, blank=True)
-    address = models.TextField()
-    address_password = models.TextField()
+    balance = models.FloatField()
     wallet_passcode = models.TextField()
     deleted = models.IntegerField()
     edu_rank = models.ForeignKey(
@@ -142,3 +141,42 @@ class Comment_Post(models.Model):
     status = models.CharField(max_length=1000)
     down = models.ManyToManyField(
         Bio, related_name="comment_post_down")
+
+
+class bad_keyword(models.Model):
+    keyword = models.TextField()
+    status = models.TextField()
+
+
+class hornorable(models.Model):
+    goal = models.IntegerField()
+    content = models.TextField()
+    user = models.ForeignKey(
+        Bio, related_name='honorable_related', on_delete=models.CASCADE, null=True)
+    status = models.TextField()
+
+
+class Quiz(models.Model):
+    name = models.TextField()
+    description = models.TextField()
+    edu_rank = models.ForeignKey(
+        Education_rank, on_delete=models.CASCADE, related_name="quiz_edu_rank")
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE, related_name="quiz_subject")
+    image = models.ImageField(upload_to="images/", null=True, blank=True)
+    grade = models.IntegerField()
+    user = models.ForeignKey(
+        Bio, on_delete=models.CASCADE, related_name="user_auth")
+    number_of_question = models.IntegerField()
+
+
+class Quiz_questions(models.Model):
+    number = models.IntegerField()
+    quiz = models.ForeignKey(
+        Quiz, on_delete=models.CASCADE, related_name="question_quiz")
+    name = models.TextField()
+    a = models.TextField()
+    b = models.TextField()
+    c = models.TextField()
+    d = models.TextField()
+    correct = models.TextField()

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="background-color: white;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
 </head>
-<body>
+<body class="background-color:white;">
     <nav class="navbar sticky-top bg-dark text-light">
         <div class="container">
             <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
@@ -28,23 +28,22 @@
                 <div style="position: sticky;position: -webkit-sticky;z-index: 1; /* Stay on top */
                 top: 0; /* Stay at the top */
                 left: 0;">
+                <a href="{% url 'quiz' %}" class="link-success">Quay lại</a>
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
                 <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
-                <b>Phân trang</b>
-                <ul style="padding-top: 5px;margin-bottom: 10px;">
-                    <li><a href="{% url 'post' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
-                    <li style="margin-top: 10px;"><a href="{% url 'question' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Hỏi đáp</a></li>
-                    <li style="margin-top: 10px;"><a href="{% url 'document' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Tài liệu</a></li>
-                    <li style="margin-top: 10px;"><a href="{% url 'quiz' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Quiz luyện tập</a></li>
-                </ul>
-                <b>Về {{bio.user.username}}</b>
-                <ul style="padding-top: 5px;margin-bottom: 10px;">
-                    <li><a href="{% url 'your_profile' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Trang cá nhân</a></li>
-                    <li style="margin-top: 10px;"><a class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Điểm & Vinh danh</a></li>
+                <b>Làm quiz</b>
+                <br>
+                <a href="{% url 'quiz_question_view' id=question.id %}"  class="button is-large is-info is-fullwidth">Làm quiz ngay</a>
+                <br>
+                <b>Thông tin</b>
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Khối Lớp: {{post.grade}}</li>
+                  <li class="list-group-item">Học Vấn: {{post.edu_rank.name}}</li>
+                  <li class="list-group-item">Môn Học: {{post.subject.name}}</li>
                 </ul>
                 <b>Khác</b>
                 <ul style="padding-top: 5px;">
-                    {% if bio.user.is_staff %}
+                  {% if bio.user.is_staff %}
                     <li><a href="{% url 'staff_index' %}" class="button is-success is-rounded is-fullwidth" style="text-decoration: none;">Trang Quản Trị Viên</a></li>
                     {% endif %}
                     <li style="margin-top: 10px;"><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
@@ -53,41 +52,28 @@
                 </div>
             </div>
             <div class="column">
-                <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
-                    <div style="padding: 30px;">
-                        <h1>GPTeen Answer</h1>
-                        <p>Lưu ý: Câu trả lời của GPTeen vẫn có thể có sai số. Hãy cân nhắc thật kỹ trước khi sử dụng</p>
-                    </div>
-                </div>
-                  <div class="card rounded shadow-lg" style="padding: 10%;">
-                      <div class="card-body">
-                        {% if status != "Công khai" %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Đợi chúng mình xem qua tý nha. Trong lúc đó sao ko khám phá BDTeen</p>
-                         <!-- <a href="" class="link-primary align-items-center text-center">Về BDTeen check</a> -->
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                           <a href="{% url 'post' %}" class="btn btn-outline-primary w-100">Khám phá các bài viết tuyệt vời khác nào</a>
-                          </div>
-                         </div>
-                         {% else %}
-                         <h5 class="text-center">Done</h5>
-                         <p class="text-center">Trở lại xem kết quả nào. Hãy reload lại nếu không thấy bài viết nhé</p>
-                         <br>
-                         <div class="columns w-100">
-                          <div class="column w-100">
-                            <input type=button value="Khám phá các bài viết tuyệt vời khác nào" class="btn btn-primary w-100" onClick="javascript:history.go(-1);"></a>
-                          </div>
-                         </div>
-                         {% endif %}
-                      </div>
+              <br>
+              <h1 class="title is-1 text-dark">{{post.name}}</h1>
+              <div class="bg-secondary w-100 rounded" style="height: 3px; margin-top: 10px;margin-bottom: 10px;"></div>
+              <p>{{post.description}}</p>
+              {% if post.image %}
+                  <img src="{{post.image.url}}" class="img-fluid w-100 h-50 rounded" style="object-fit: cover;" />
+              {% endif %}
+              <br>
+              <div class="row" style="margin-top: 10px;">
+                {% if bio == post.user %}
+                  <div class="col-lg">
+                      <a href="{% url 'delete_quiz' id=post.id %}" class="btn btn-danger w-100">Xóa quiz</a>
+                  </div>
+                {% endif %}
+                  <div class="col-lg">
+                      <a href="{% url 'quiz_question_view' id=question.id %}" class="btn btn-primary w-100">Làm quiz</a>
                   </div>
               </div>
-            </div>
+              <br>
         </div>
     </div>
-    <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
