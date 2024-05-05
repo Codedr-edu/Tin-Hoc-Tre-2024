@@ -1,0 +1,70 @@
+Large Language Model
+Thuật toán gợi ý tìm kiếm:
+- Chấm điểm từng câu trường hợp
+- Tính xác suất có thể xảy ra từ những từ đã biết
+- Tùy và độ random sẽ ra một nhánh khác nhau
+- Input và output quá nhiều lần thì nó sẽ có thể học được theo 2 vế đầu
+
+Stable Diffusion:
+Tạo ảnh Dall-e & Mid journey
+- Đưa text-to-image
+- Có một số dữ liệu trước đó sẽ đưa ra output khác nhau
+- Random 1 loạt chấm màu (pixel)
+- Khiến các chấm màu về giống những dữ liệu đã biết và đã được nhập vào
+- Thu thập nhiều hình ảnh để train dữ liệu rằng cái này trông như thế nào
+- Đưa từ các pixel về các hình ảnh đã được train
+Demo Mid journey
+- Bắt đầu bằng keyword imagine (tưởng tượng)
+- Nhập dữ liệu cần vào
+- Mid journey bắt đầu random pixel
+- Random 4 hướng triển khai bằng pixel
+- Bắt đầu làm mịn dần để giống với dữ liệu đã được nhập và dữ liệu đã được train
+- Chạy 4 luồng và từ từ thành hình từ các pixel
+- Muốn kết quả tốt nhất thì cần có promt đủ tốt
+
+
+Rag Model
+- Viết một câu truy vấn rồi máy sẽ phân loại và xử lý từ nhiều nguồn và LLM
+- Mô hình này giúp khắc phục việc dữ liệu của chatGPT chỉ dừng lại ở năm 2021
+Demo Coze:
+- Sử dụng core LLM của GPT4
+- Hỏi và đáp như LLM
+- Add các plugin và cấp quyền gg calendar
+- Nó sẽ tự add vào như các dữ liệu đã cho
+- Tạo event từ các thông tin trong ảnh bằng plugin OCR
+- Chạy thêm các prompt ngầm nên hơi lâu
+- OCR đọc được chính xác chữ trong hình 
+- plugin sẽ check và add vào
+- Có nhiều plugin với nhiều mục đích khác nhau
+- Cần biết cách lắp ghép
+- Có thể tự code plugin và workflow
+- Đưa question pack và giả lập cuộc trò chuyện để đánh giá
+- Có thể lưu trữ cuộc trò chuyện và nhiều thứ khác
+
+Hạn chế & tiềm năng của thuật toán LLM & SD:
+- Llamba3, ChatGPT, Gemini
+- Vấn đề lắp ráp các thuật toán và mô hình như thế nào mới tạo nên dự án tốt
+Về vấn đề AI thay thế con người:
+- AI chỉ là agent của mình
+- Biết prompt như thế nào để trả ra kết quả tốt nhất
+- Bổ sung các tư duy để có thể prompt tốt nhất
+Cách tiếp cận:
+- Tiếp cận từ basic của machine learning
+- Tìm keyword hợp lý cho chatGPT
+
+Sử dụng nhiều các công cụ hơn hay làm sản phẩm kỹ thuật nhiều hơn?
+- A & B có thể làm cả 2. C & D ưu tiên công cụ
+- Phải là ý tưởng của mình
+- Phải hoạt động được
+- Phải hiểu BGK muốn gì để thắng
+- Tiếp cận nhiều nhà đầu tư, đồng nghiệp thì cứ phô ra
+- Tìm hiểu model trên huggingface
+Private data thì như thế nào:
+- Training offline
+- Tìm cách bảo vệ khác
+- Fine-tuning & Training rất lâu
+- Nghiên cứu về ray.io để train các dữ liệu nhanh hơn
+
+Lấy bot coze bằng python
+- Có các lấy bằng request của python sử dụng endpoint API
+- Phải sử dụng các dịch vụ cloud để đấu nối Rag model và đấu nối với google search API và ChatGPT API 

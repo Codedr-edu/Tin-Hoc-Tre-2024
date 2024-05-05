@@ -1,0 +1,12 @@
+curl --location --request POST 'https://api.coze.com/open_api/v2/chat' \
+>> --header 'Authorization: Bearer 7361260540398190593' \
+>> --header 'Content-Type: application/json' \
+>> --header 'Accept: */*' \
+>> --header 'Host: api.coze.com' \
+>> --header 'Connection: keep-alive' \
+>> --data-raw '{
+>>     "conversation_id": "123",
+>>     "bot_id": "7361260540398190593",
+>>     "user": "123333333",
+>>     "query": "Tell me some information about the JAL516 flight accident at Haneda airport",
+>>     "stream":true
