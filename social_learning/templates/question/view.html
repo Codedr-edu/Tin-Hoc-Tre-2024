@@ -134,7 +134,7 @@
                                 </div>
                                 <div class="col-lg align-self-end">
                                     <div class="d-lg-flex align-items-end justify-content-end" style="margin-right: 10%;">
-                                        {% if bio == post.user and post.answered == 0 %}
+                                        {% if bio == post.user or bio.user.is_staff and post.answered == 0 %}
                                             <button type="button" data-bs-toggle="modal" data-bs-target="#check_question" class="btn btn-success"><i class="bi bi-check-lg"></i></button>
                                             <div class="modal fade" id="check_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                               <div class="modal-dialog modal-dialog-centered">
@@ -147,7 +147,7 @@
                                                       <p>Bạn có chắc chắn rằng sẽ chọn câu trả lời này</p>
                                                       <div class="d-lg-flex">
                                                         <button class="btn btn-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Tôi cần suy nghĩ thêm</button>
-                                                        {% if post.price > 0 %}
+                                                        {% if post.price > 0 and post.user == bio %}
                                                           <a class="btn btn-success" data-bs-toggle="modal" data-bs-target="#check_code">Tôi chắc chắn</a>
                                                         {% else %}
                                                           <a class="btn btn-success" href="{% url 'check_question' id=answer.id %}">Tôi chắc chắn</a>
