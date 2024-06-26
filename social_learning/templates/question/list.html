@@ -30,6 +30,7 @@
                 left: 0;">
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
                 <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
+                <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
                 <b>Tìm kiếm</b>
                 <form style="margin-bottom: 10px;">
                     <div class="columns">
@@ -80,41 +81,55 @@
                 <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" data-bs-toggle="modal" data-bs-target="#exampleModal"  class="btn btn-info w-100">Đăng câu hỏi</a>
                 {% if posts|length != 0 %}
                 {% for post in posts %}
-                    <div class="d-flex justify-content-center shadow align-items-start w-100 mx-auto card">
-                        <div class="card-header w-100">
-                            <div class="container">
-                                <div class="columns">
-                                  <div class="column">
-                                    <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;"> <a class="link-dark">   {{post.user.user.username}}</a>
-                                  </div>
-                                </div>
+                <div class="d-flex justify-content-center align-items-start w-100 mx-auto">
+                  <div class="card mb-3 w-100 shadow-lg">
+                      <div class="row g-0">
+                        <div class="col-md-4">
+                          <img src="{{post.image.url}}" class="img-fluid rounded-start" style="object-fit: cover;" alt="...">
+                        </div>
+                        <div class="col-md-8">
+                          <div class="card-body">
+                            <h5 class="card-title">{{post.title}}</h5>
+                            <a class="button is-small is-primary-dark" style="margin-bottom: 10px;">{{post.subject.name}}</a>
+                            <div class="columns">
+                              <div class="column w-100">
+                                <a href="{% url 'like_question' id=post.id %}" class="btn btn-primary w-100"><i class="bi bi-hand-thumbs-up"></i> {{post.like.count}}</a>
+                              </div>
+                              <div class="column w-100">
+                                <a href="{% url 'dislike_question' id=post.id %}" class="btn btn-danger w-100"><i class="bi bi-hand-thumbs-down"></i> {{post.dislike.count}}</a>
+                              </div>
                             </div>
-                        </div>
-                        {% if post.image %}
-                        <img src="{{post.image.url}}" class="w-100 h-50 rounded" style="object-fit: cover;" />
-                        {% endif %}
-                        <div class="card-body w-100">
-                        <a href="{% url 'question_view' id=post.id %}" class="link-dark"><h3 class="card-text text-start align-items-start">{{post.title}}</h3></a>
-                        <br>
-                        <p>Phần Thưởng Lên Đến: {{post.price}} Teen</p>
-                        <br>
-                        <div class="columns">
-                          <div class="column w-100">
-                            <a href="{% url 'like_question' id=post.id %}" class="btn btn-primary w-100"><i class="bi bi-hand-thumbs-up"></i> {{post.like.count}}</a>
+                            <div class="columns" style="margin-top: -20px;">
+                              <div class="column">
+                                <a href="{% url 'question_view' id=post.id %}" class="btn btn-primary w-100 is-fullwidth">Tìm hiểu thêm</a>
+                              </div>
+                              <div class="column w-100">
+                                <button class="button is-primary w-100" onclick="myFunction()"><i class="bi bi-share" style="margin-right: 5px;"></i> Chia sẻ câu hỏi</button>
+                              </div>
+                              <script>
+                                function myFunction() {
+                                  // Get the text field
+                                  var copyText = "http://localhost:8000/view/question/{{post.id}}";
+    
+                                  // Select the text field
+                                  //copyText.select();
+                                  //copyText.setSelectionRange(0, 99999); // For mobile devices
+    
+                                  // Copy the text inside the text field
+                                  navigator.clipboard.writeText(copyText);
+    
+                                  // Alert the copied text
+                                  //alert("Copied the text: " + copyText.value);
+                                }
+                              </script>
+                            </div>
+                            <p class="card-text"><img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a class="link-dark">   {{post.user.user.username}}</a></p>
                           </div>
-                          <div class="column w-100">
-                            <a href="{% url 'dislike_question' id=post.id %}" class="btn btn-danger w-100"><i class="bi bi-hand-thumbs-down"></i> {{post.dislike.count}}</a>
-                          </div>
-                          <div class="column w-100">
-                            <a href="{% url 'question_view' id=post.id %}" class="btn btn-secondary w-100"><i class="bi bi-lightbulb"></i> {{post.comment_counter}}</a>
-                          </div>
                         </div>
-                        </div>
-                        <div class="card-footer w-100 align-items-center justify-content-center">
-                          <p class="text-center">{{post.datetime}}</p>
-                        </div>
+                      </div>
                     </div>
-                    <br>
+              </div>
+              <br>
                 {% endfor %}
             {% else %}
                     <div class="card w-75 align-items-center justify-content-center vh-75 mx-auto d-flex text-center">
@@ -125,22 +140,36 @@
         </div>
     </div>
     <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <h1 class="text-center">Hỏi GPTeen</h1>
-                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
-                                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
-            </form>
-            </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <h1 class="text-center">Hỏi GPTeen</h1>
+            <p>Bạn có thể hỏi GPTeen bằng các cách sau</p>
+            <b>1. Văn bản</b>
+              <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                              <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
+                              <button type="submit" class="btn btn-success w-100">Hỏi với 10 Teen</button>
+          </form>
+          <b>2. Ảnh</b>
+          <form action="{% url 'gpteen_image' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+              {% csrf_token %}
+              <input type="file" name="image" class="form-control w-100" style="margin-bottom: 10px;" />
+              <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+          </form>
+          <b>3. File tài liệu</b>
+          <form action="{% url 'gpteen_document' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+              {% csrf_token %}
+              <input type="file" name="doc" class="form-control w-100" style="margin-bottom: 10px;" />
+              <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+          </form>
           </div>
         </div>
       </div>
+    </div>
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
@@ -207,6 +236,44 @@
                       </div>
                   </div>
                 </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="ask_gpteen_university" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">GPTeen University</h1>
+              <p>Hãy để GPTeen cùng bạn tìm ra môi trường đại học phù hợp với năng lực của bạn.</p>
+              <p style="color: red;">*Lưu ý: Điểm GPTeen xử lý được là điểm thi tốt nghiệp THPTQG của bạn theo thể thức khối ba môn. Bạn có thể xét bằng dữ liệu điểm khảo sát với thể thức tương tự</p>
+            <form action="{% url 'gpteen_university' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                    <div style="margin-bottom: 10px;">
+                      <label>Tổng điểm ba môn cộng lại</label>
+                      <input type="text" name="total_score" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Mã khối</label>
+                      <input type="text" name="category_code" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Nghề nghiệp mong muốn</label>
+                      <input type="text" name="job" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Khu vực <span style="color: red;">*</span></label>
+                          <select class="form-select" name="area">
+                            <option value="Miền Bắc">Miền Bắc</option>
+                            <option value="Miền Trung">Miền Trung</option>
+                            <option value="Miền Nam">Miền Nam</option>
+                          </select>
+                    </div>
+                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+            </form>
             </div>
           </div>
         </div>

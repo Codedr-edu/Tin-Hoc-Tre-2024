@@ -30,6 +30,7 @@
                 left: 0;">
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
                 <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
+                <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
                 <b>Phân trang</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
                     <li><a href="{% url 'post' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
@@ -122,10 +123,62 @@
             </div>
             <div class="modal-body">
               <h1 class="text-center">Hỏi GPTeen</h1>
-                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
+              <p>Bạn có thể hỏi GPTeen bằng các cách sau</p>
+              <b>1. Văn bản</b>
+                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
                   {% csrf_token %}
                                 <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
-                                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+                                <button type="submit" class="btn btn-success w-100">Hỏi với 10 Teen</button>
+            </form>
+            <b>2. Ảnh</b>
+            <form action="{% url 'gpteen_image' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                <input type="file" name="image" class="form-control w-100" style="margin-bottom: 10px;" />
+                <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+            </form>
+            <b>3. File tài liệu</b>
+            <form action="{% url 'gpteen_document' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                <input type="file" name="doc" class="form-control w-100" style="margin-bottom: 10px;" />
+                <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="ask_gpteen_university" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">GPTeen University</h1>
+              <p>Hãy để GPTeen cùng bạn tìm ra môi trường đại học phù hợp với năng lực của bạn.</p>
+              <p style="color: red;">*Lưu ý: Điểm GPTeen xử lý được là điểm thi tốt nghiệp THPTQG của bạn theo thể thức khối ba môn. Bạn có thể xét bằng dữ liệu điểm khảo sát với thể thức tương tự</p>
+            <form action="{% url 'gpteen_university' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                    <div style="margin-bottom: 10px;">
+                      <label>Tổng điểm ba môn cộng lại</label>
+                      <input type="text" name="total_score" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Mã khối</label>
+                      <input type="text" name="category_code" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Nghề nghiệp mong muốn</label>
+                      <input type="text" name="job" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Khu vực <span style="color: red;">*</span></label>
+                          <select class="form-select" name="area">
+                            <option value="Miền Bắc">Miền Bắc</option>
+                            <option value="Miền Trung">Miền Trung</option>
+                            <option value="Miền Nam">Miền Nam</option>
+                          </select>
+                    </div>
+                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
             </form>
             </div>
           </div>

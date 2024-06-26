@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
+from django.core.validators import FileExtensionValidator
 
 
 class Education_rank(models.Model):
@@ -180,3 +182,12 @@ class Quiz_questions(models.Model):
     c = models.TextField()
     d = models.TextField()
     correct = models.TextField()
+
+
+class GPTeen_doc(models.Model):
+    image = models.ImageField(upload_to="images/", null=True, blank=True)
+    doc = models.FileField(upload_to="files/gpteen/")
+
+
+class GPTeen_University_doc(models.Model):
+    doc = models.FileField(upload_to="files/university/")

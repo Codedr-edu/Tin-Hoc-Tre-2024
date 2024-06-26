@@ -68,7 +68,7 @@ urlpatterns = [
     # payment
     path("payment/question/<int:id>", views.question_payment, name="pay_question"),
     path("payment/document/<int:id>", views.document_payment, name="pay_document"),
-    path("payment/post/<int:id>", views.post_payment, name="post_payment"),
+    path("payment/post/<int:id>", views.post_payment, name="pay_post"),
     # list_view
     path("post/",
          views.post_list_view, name="post"),
@@ -147,7 +147,8 @@ urlpatterns = [
     path("success/<status>", views.success, name="success"),
     path("check/question/<int:id>/", views.check_question, name="check_question"),
     path("ask/gpteen", views.gpteen_input, name="ask_gpteen"),
-    path("result/gpteen/<prompt>", views.gpteen_answer, name="gpteen_answer"),
+    path("result/gpteen/<str:prompt>", views.gpteen_answer,
+         name="gpteen_answer_result"),
     path("user/honor/", views.user_honor, name="user_honor"),
     path("staff/honor", views.staff_all_honor, name="staff_honor"),
     path("satff/check/honor/<int:id>",
@@ -165,5 +166,15 @@ urlpatterns = [
     path("practice/question/<int:id>",
          views.quiz_question_view, name="quiz_question_view"),
     path("practice/after/question/<int:id>/point/<int:point>/status/<status>",
-         views.quiz_question_after_view, name="quiz_question_after_view")
+         views.quiz_question_after_view, name="quiz_question_after_view"),
+    path("gpteen/image/", views.GPTeen_image, name="gpteen_image"),
+    path("gpteen/image/result/<int:id>",
+         views.GPTeen_image_result, name="gpteen_image_result"),
+    path("gpteen/document/", views.GPTeen_document, name="gpteen_document"),
+    path("gpteen/document/result/<int:id>",
+         views.GPTeen_document_result, name="gpteen_document_result"),
+    path("gpteen/university/", views.GPTeen_university, name="gpteen_university"),
+    path("gpteen/university/result/score/<score>/category/code/<category_code>/job/<job>/area/<area>",
+         views.GPTeen_university_result, name="gpteen_university_result"),
+    path("post/<int:id>", views.post_view, name="post_view")
 ]

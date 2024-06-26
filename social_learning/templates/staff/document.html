@@ -80,9 +80,11 @@
                 <tbody>
                     {% if documents %}
                         {% for document in documents %}
-                            <td>{{document.id}}</td>
+                            <tr>
+                              <td>{{document.id}}</td>
                             <td>{{document.title}}</td>
                             <td><a href="{% url 'staff_document_view' id=document.id %}" class="link-success">Xem chi tiết</a></td>
+                            </tr>
                         {% endfor %}
                     {% endif %}
                 </tbody>

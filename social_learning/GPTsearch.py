@@ -18,7 +18,8 @@ headers = {
 
 
 def GPTeen(prompt, bot_id=bot_id, url=url, headers=headers):
-    prompt = "Hãy đưa ra câu trả lời đúng nhất cho câu hỏi "+str(prompt)
+    prompt = prompt = "Hãy đưa ra câu trả lời đúng nhất cho câu hỏi: " + \
+        str(prompt)+". Hãy để câu trả lời ở định dạng HTML với các thuộc tính CSS cho các thẻ nhằm làm xuống dòng, cách dòng, in đậm, highlight để đoạn nội dung đó được tốt hơn. Đừng giải thích gì về đoạn code đó. Bỏ qua các phần giải thích, lưu ý và chữ html trên đầu. Tôi chỉ cần đoạn code bên trong phần body. Tôi chỉ cần đoạn code, không có bất cứ thứ gì khác"
     data = {
         "conversation_id": "123",
         "bot_id": bot_id,

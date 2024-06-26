@@ -23,7 +23,11 @@ import hashlib
 import os
 from .GPTsearch import GPTeen
 from .GPTsecurity import check_document, check_image, check_content
+from .GPTeacher import search_document, search_image
 import random
+from .GPTformatter import check_and_format_content
+from .GPTeen_university import gptu_check
+
 
 '''
 web3 = Web3(Web3.HTTPProvider(
@@ -67,12 +71,12 @@ def Signup(request):
         if not user and not user2:
             user = User.objects.create_user(username, email, password)
             user.save()
-            user = User.objects.get(username=username)
-            edu = Education_rank.objects.get(id=education_rank)
+            user = User.objects.filter(username=username).first()
+            edu = Education_rank.objects.filter(id=education_rank).first()
             if user and edu:
                 # key = create_private_key()
                 passcode = hashed(passcode)
-                bio = Bio(user=user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu,
+                bio = Bio(user=user, avatar=avatar, thumbnail=thumbnail, grade=grade, edu_rank=edu, deleted=0,
                           description=description, balance=1000, wallet_passcode=passcode)
                 bio.save()
                 login(request, user,
@@ -204,6 +208,7 @@ def post_list_view(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         subject = Subject.objects.all()
+        cmt = Comment_Post.objects
         if request.method == "GET":
             search = request.GET.get("search")
             topic = request.GET.get("topic")
@@ -223,7 +228,8 @@ def post_list_view(request):
         else:
             post = Post.objects.filter(subject=s2, status="Công khai").all()
 
-        context = {"posts": post[::-1], "subjects": subject, "bio": bio}
+        context = {"posts": post[::-1],
+                   "subjects": subject, "bio": bio, "cmts": cmt}
     else:
         return redirect("index")
     return render(request, "post/list.html", context)
@@ -235,23 +241,29 @@ def post_list_view(request):
 def post_create(request):
     if request.user.is_authenticated:
         user = Bio.objects.filter(user=request.user).first()
-        bad = bad_keyword.objects.filter(status="Cấm").all()
+        # bad = bad_keyword.objects.filter(status="Cấm").all()
         if request.method == "POST":
             content = request.POST.get("content")
+            image = request.FILES.get("image")
+            # video = request.FILE.get("video")
             subject = Subject.objects.filter(
                 id=request.POST.get("subject")).first()
 
-            check = "Công khai"
-            check_cnt = check_content(content)
-            fail = "có nội dung nhạy cảm"
-            if check_cnt == fail:
-                check = "Chờ kiểm duyệt"
-
-            status = check
-
-            sql = Post(content=content, user=user, subject=subject,
-                       status=status, comment_counter=0)
+            sql = Post(content=content, user=user, subject=subject, image=image,
+                       status="Chờ kiểm duyệt", comment_counter=0)
             sql.save()
+
+            check_cnt = check_and_format_content(content)
+            if sql.image:
+                check_img = check_image(image=sql.image.url)
+            else:
+                check_img = "Pass"
+            fail = "có nội dung nhạy cảm"
+            if check_cnt != fail or check_img != fail:
+                sql.status = "Công khai"
+                sql.content = check_cnt[8:-4]
+                sql.save()
+
             return redirect("success", status=sql.status)
     else:
         return redirect("index")
@@ -267,6 +279,7 @@ def document_create(request):
             file = request.FILES.get('file')
             grade = request.POST.get("grade")
             price = request.POST.get("price")
+            # video = request.FILE.get("video")
             edu_rank = request.POST.get("education_rank")
             subject = request.POST.get("subject")
 
@@ -278,13 +291,17 @@ def document_create(request):
             sql.save()
             # sql = Document.objects.filter()
 
-            check_doc = check_document(sql.file.url)
-            check_img = check_image(sql.image.url)
+            check_doc = check_document(image=sql.file.url)
+            if sql.image:
+                check_img = check_image(image=sql.image.url)
+            else:
+                check_img = "Pass"
             check_title = check_content(sql.title)
-            check_description = check_content(sql.description)
+            check_description = check_and_format_content(sql.description)
             fail = "có nội dung nhạy cảm"
             if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
                 sql.status = "Công khai"
+                sql.description = check_description[8:-4]
                 sql.save()
 
             return redirect("success", status=sql.status)
@@ -301,6 +318,7 @@ def question_create(request):
             file = request.FILES.get("file")
             image = request.FILES.get("image")
             grade = request.POST.get("grade")
+            # video = request.FILE.get("video")
             edu_rank = request.POST.get("education_rank")
             subject = request.POST.get("subject")
             price = int(request.POST.get("price"))
@@ -312,13 +330,20 @@ def question_create(request):
                            subject=subject, image=image, grade=grade, education_rank=edu_rank, user=user, answered=0, comment_counter=0)
             sql.save()
 
-            check_doc = check_document(sql.file.url)
-            check_img = check_image(sql.image.url)
+            if sql.file:
+                check_doc = check_document(image=sql.image.url)
+            else:
+                check_doc = "Pass"
+            if sql.image:
+                check_img = check_image(image=sql.image.url)
+            else:
+                check_img = "Pass"
             check_title = check_content(sql.title)
-            check_description = check_content(sql.description)
+            check_description = check_and_format_content(sql.description)
             fail = "có nội dung nhạy cảm"
             if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
                 sql.status = "Công khai"
+                sql.description = check_description[8:-4]
                 sql.save()
 
             return redirect("success", status=sql.status)
@@ -649,24 +674,10 @@ def like_document(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         if not bio in post.like.all():
             post.like.add(bio)
-            return redirect("read_document", id=id)
+            return redirect("document_view", id=id)
         else:
             post.like.remove(bio)
-            return redirect("read_document", id=id)
-    else:
-        return redirect("index")
-
-
-def like_document(request, id):
-    if request.user.is_authenticated:
-        post = Document.objects.filter(id=id).first()
-        bio = Bio.objects.filter(user=request.user).first()
-        if not bio in post.like.all():
-            post.like.add(bio)
-            return redirect("read_document", id=id)
-        else:
-            post.like.remove(bio)
-            return redirect("read_document", id=id)
+            return redirect("document_view", id=id)
     else:
         return redirect("index")
 
@@ -775,7 +786,7 @@ def comment_post(request, id):
     if request.user.is_authenticated:
         post = Post.objects.filter(id=id).first()
         bio = Bio.objects.filter(user=request.user).first()
-        bad = bad_keyword.objects(status="Cấm").all()
+        # bad = bad_keyword.objects(status="Cấm").all()
         if post and bio:
             if request.method == "POST":
                 content = request.POST.get("content")
@@ -786,17 +797,15 @@ def comment_post(request, id):
                 if check_cnt == fail:
                     check = "Chờ kiểm duyệt"
 
-                status = check
-
                 sql = Comment_Post(post=post, user=bio,
-                                   content=content, status=status)
+                                   content=content, status=check)
                 sql.save()
                 post.comment_counter += 1
                 post.save()
 
-                return redirect("success", status=status)
+                return redirect("success", status=check)
         else:
-            return redirect("read_post", id=id)
+            return redirect("post_view", id=id)
     else:
         return redirect("index")
 
@@ -805,7 +814,7 @@ def comment_document(request, id):
     if request.user.is_authenticated:
         post = Document.objects.filter(id=id).first()
         bio = Bio.objects.filter(user=request.user).first()
-        bad = bad_keyword.objects.filter(status="Cấm").all()
+        # bad = bad_keyword.objects.filter(status="Cấm").all()
         if post and bio:
             if request.method == "POST":
                 content = request.POST.get("content")
@@ -1058,8 +1067,19 @@ def question_view(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         context = {'post': question, "answers": noti, "bio": bio}
     else:
-        return redirect('a_login')
+        return redirect('check')
     return render(request, 'question/view.html', context)
+
+
+def post_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        post = Post.objects.filter(id=id).first()
+        comment = Comment_Post.objects.filter(post=post).first()
+        context = {"bio": bio, "post": post, "comments": comment}
+    else:
+        return redirect("check")
+    return render(request, "post/view.html", context=context)
 
 
 def document_view(request, id):
@@ -1073,7 +1093,7 @@ def document_view(request, id):
         context = {'post': document, "comments": noti,
                    'check': check, "bio": bio}
     else:
-        return redirect('a_login')
+        return redirect('check')
     return render(request, 'document/view.html', context)
 
 
@@ -1283,9 +1303,9 @@ def staff_index(request):
             status="Chờ kiểm duyệt").count()
         comment_document = Comment_Document.objects.filter(
             status="Chờ kiểm duyệt").count()
-        # honor = hornorable
+        honor = hornorable.objects.filter(status="Chờ xử lý").count()
         answer = Answer.objects.filter(status="Chờ kiểm duyệt").count()
-        context = {"post": post, "question": question, "document": document,
+        context = {"post": post, "question": question, "document": document, "honor": honor,
                    "comment_post": comment_post, "comment_document": comment_document, "answer": answer}
     else:
         return redirect("check")
@@ -1312,7 +1332,7 @@ def staff_question_list(request):
 
 def staff_document_list(request):
     if request.user.is_authenticated and request.user.is_staff:
-        post = Document.objects.all()
+        post = Document.objects.filter(status="Chờ kiểm duyệt").all()
         context = {"documents": post}
     else:
         return redirect("check")
@@ -1374,8 +1394,8 @@ def staff_delete_question(request, id):
         percent = total * 20 / 100
         bio = Bio.objects.filter(user=post.user.user).first()
         if bio.deleted <= percent:
-            bio.user.user.is_active = False
-            bio.user.user.save()
+            bio.user.is_active = False
+            bio.user.save()
 
         post.delete()
 
@@ -1393,8 +1413,8 @@ def staff_delete_document(request, id):
         percent = total * 20 / 100
         bio = Bio.objects.filter(user=post.user.user).first()
         if bio.deleted <= percent:
-            bio.user.user.is_active = False
-            bio.user.user.save()
+            bio.user.is_active = False
+            bio.user.save()
 
         post.delete()
 
@@ -1412,8 +1432,8 @@ def staff_delete_comment_post(request, id):
         percent = total * 20 / 100
         bio = Bio.objects.filter(user=post.user.user).first()
         if bio.deleted <= percent:
-            bio.user.user.is_active = False
-            bio.user.user.save()
+            bio.user.is_active = False
+            bio.user.save()
 
         post.delete()
 
@@ -1431,8 +1451,8 @@ def staff_delete_answer(request, id):
         percent = total * 20 / 100
         bio = Bio.objects.filter(user=post.user.user).first()
         if bio.deleted <= percent:
-            bio.user.user.is_active = False
-            bio.user.user.save()
+            bio.user.is_active = False
+            bio.user.save()
 
         post.delete()
 
@@ -1852,9 +1872,9 @@ def check_question(request, id):
 def gpteen_input(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
-        if bio.balance >= 100 and request.method == "POST":
+        if bio.balance >= 10 and request.method == "POST":
             prompt = request.POST.get("gpteen")
-            return redirect("gpteen_answer", prompt=prompt)
+            return redirect("gpteen_answer_result", prompt=str(prompt))
     else:
         return redirect("index")
 
@@ -1862,11 +1882,11 @@ def gpteen_input(request):
 def gpteen_answer(request, prompt):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
-        if bio.balance >= 100 and prompt:
-            bio.balance -= 100
+        if bio.balance >= 10 and prompt:
+            bio.balance -= 10
             bio.save()
             result = GPTeen(prompt=prompt)
-            context = {"result": result, "bio": bio}
+            context = {"result": result[8:-4], "bio": bio}
         else:
             return redirect("all_error")
     else:
@@ -2021,7 +2041,7 @@ def make_question(request, quiz_id, ques_no):
                     if ques_no == quiz.number_of_question:
                         return redirect("quiz")
                     else:
-                        return redirect("make_question", quiz_id=sql.id, ques_no=ques_no+1)
+                        return redirect("make_question", quiz_id=quiz_id, ques_no=ques_no+1)
         else:
             return redirect("all_error")
     else:
@@ -2129,8 +2149,100 @@ def quiz_question_after_view(request, status, point, id):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         ques = Quiz_questions.objects.filter(id=id).first()
-        context = {"bio": bio, "status": status,
-                   "point": point, "next_question": ques.number+1, "ques": ques}
+        next_ques = Quiz_questions.objects.filter(
+            number=ques.number+1, quiz=ques.quiz).first()
+        if next_ques:
+            context = {"bio": bio, "status": status,
+                       "point": point, "next_question": next_ques.id, "ques": ques}
+        else:
+            context = {"bio": bio, "status": status,
+                       "point": point, "next_question": False, "ques": ques}
     else:
         return redirect("index")
     return render(request, "quiz/question/result.html", context=context)
+
+
+def GPTeen_image(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if request.method == "POST":
+            image = request.POST.get("image")
+            sql = GPTeen_doc(image=image)
+            sql.save()
+            return redirect("gpteen_image_result", id=sql.id)
+    else:
+        return redirect("check")
+
+
+def GPTeen_image_result(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        gpteen_image = GPTeen_doc.objects.filter(id=id).first()
+        if bio and gpteen_image.image:
+            result = search_image(url=gpteen_image.image.url)
+            bio.balance -= 50
+            bio.save()
+            context = {"bio": bio, "result": result[8:-4]}
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+    return render(request, "gpteen/image/result.html", context=context)
+
+
+def GPTeen_document(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if request.method == "POST":
+            doc = request.POST.get("doc")
+            sql = GPTeen_doc(doc=doc)
+            sql.save()
+            return redirect("gpteen_document_result", id=sql.id)
+    else:
+        return redirect("check")
+
+
+def GPTeen_document_result(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        gpteen_doc = GPTeen_doc.objects.filter(id=id).first()
+        if bio and gpteen_doc.doc:
+            result = search_document(url=gpteen_doc.doc.url)
+            bio.balance -= 50
+            bio.save()
+            context = {"bio": bio, "result": result[8:-4]}
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+    return render(request, "gpteen/document/result.html", context=context)
+
+
+def GPTeen_university(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        if request.method == "POST":
+            total_score = request.POST.get("total_score")
+            category_code = request.POST.get("category_code")
+            job = request.POST.get("job")
+            area = request.POST.get("area")
+            return redirect("gpteen_university_result", score=total_score, category_code=category_code, job=job, area=area)
+    else:
+        return redirect("check")
+
+
+def GPTeen_university_result(request, score, category_code, job, area):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        # gpteen_doc = GPTeen_University_doc.objects.filter(id=id).first()
+        if bio:
+            result = gptu_check(
+                score=score, category_code=category_code, job=job, area=area)
+            bio.balance -= 100
+            bio.save()
+            context = {"bio": bio, "result": result}
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+    return render(request, "gpteen/university/result.html", context=context)

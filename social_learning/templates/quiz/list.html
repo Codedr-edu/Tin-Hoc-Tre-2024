@@ -81,7 +81,7 @@
                     </div>
                 </div>
                 {% if bio.user.is_staff %}
-                <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" href="{% url 'make_quiz' %}">Đăng bài viết</a>
+                <a class="button is-primary is-fullwidth" style="text-decoration: none;margin-bottom: 20px;" href="{% url 'make_quiz' %}">Đăng Quiz</a>
                 {% endif %}
                 {% if posts|length != 0 %}
                 {% for post in posts %}
@@ -95,8 +95,15 @@
                                 <div class="card-body">
                                   <h5 class="card-title">{{post.name}}</h5>
                                   <p class="card-text">{{post.description}}</p>
-                                  <a href="{% url 'quiz_view' id=post.id %}" class="button is-primary is-fullwidth">Tìm hiểu thêm</a>
-                                  <p class="card-text"><small class="text-body-secondary">Quiz của {{bio.user.username}}</small></p>
+                                  <div class="columns">
+                                    <div class="column">
+                                      <a href="{% url 'quiz_view' id=post.id %}" class="btn btn-primary w-100 is-fullwidth">Tìm hiểu thêm</a>
+                                    </div>
+                                    <div class="column">
+                                      <button class="button is-primary is-fullwidth"><i class="bi bi-share" style="margin-right: 5px;"></i> Chia sẻ bài viết</button>
+                                    </div>
+                                  </div>
+                                  <p class="card-text"><img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a class="link-dark">   {{post.user.user.username}}</a></p>
                                 </div>
                               </div>
                             </div>
@@ -113,22 +120,36 @@
         </div>
     </div>
     <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <h1 class="text-center">Hỏi GPTeen</h1>
-                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
-                  {% csrf_token %}
-                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
-                                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
-            </form>
-            </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <h1 class="text-center">Hỏi GPTeen</h1>
+            <p>Bạn có thể hỏi GPTeen bằng các cách sau</p>
+            <b>1. Văn bản</b>
+              <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                              <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
+                              <button type="submit" class="btn btn-success w-100">Hỏi với 10 Teen</button>
+          </form>
+          <b>2. Ảnh</b>
+          <form action="{% url 'gpteen_image' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+              {% csrf_token %}
+              <input type="file" name="image" class="form-control w-100" style="margin-bottom: 10px;" />
+              <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+          </form>
+          <b>3. File tài liệu</b>
+          <form action="{% url 'gpteen_document' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+              {% csrf_token %}
+              <input type="file" name="doc" class="form-control w-100" style="margin-bottom: 10px;" />
+              <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
+          </form>
           </div>
         </div>
       </div>
+    </div>
       <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">

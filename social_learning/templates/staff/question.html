@@ -80,9 +80,11 @@
                 <tbody>
                     {% if questions %}
                         {% for question in questions %}
-                            <td>{{question.id}}</td>
+                        <tr>
+                          <td>{{question.id}}</td>
                             <td>{{question.title}}</td>
                             <td><a href="{% url 'staff_question_view' id=question.id %}" class="link-success">Xem chi tiết</a></td>
+                        </tr>
                         {% endfor %}
                     {% endif %}
                 </tbody>

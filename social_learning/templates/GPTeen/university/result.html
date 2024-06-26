@@ -8,11 +8,15 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+    <style>
+        strong{color:black;}
+        tr{background-color: black;}
+    </style>
 </head>
 <body>
     <nav class="navbar sticky-top bg-dark text-light">
         <div class="container">
-            <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+            <a href="/post" class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
           <div class="text-end justify-content-end align-items-end">
             <div class="columns">
                 <div class="column w-100">
@@ -29,8 +33,7 @@
                 top: 0; /* Stay at the top */
                 left: 0;">
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
-                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
-                <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
+                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">GPTeen University</button>
                 <b>Phân trang</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
                     <li><a href="{% url 'post' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
@@ -56,35 +59,18 @@
             <div class="column">
                 <div class="has-background-primary-dark text-light" style="margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <h1>Bạn đã trả lời {{status}}</h1>
-                        {% if status == "Đúng" %}
-                        <p>Chúc mừng! Bạn được cộng {{point}} điểm</p>
-                        {% else %}
-                        <p>Tiếc quá! Cố gắng lên nhé</p>
-                        {% endif %}
+                        <h1>GPTeen Answer</h1>
+                        <p>Lưu ý: Câu trả lời của GPTeen vẫn có thể có sai số. Hãy cân nhắc thật kỹ trước khi sử dụng</p>
                     </div>
                 </div>
                 <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <p>câu trả lời đúng là: {{ques.corect}}</p>
+                        {{result|safe}}
                     </div>
                 </div>
                 <div class="shadow-lg" style="background-color:whitesmoke;margin-bottom: 20px;border-radius: 10px;">
                     <div style="padding: 30px;">
-                        <div class="columns">
-                            <div class="column">
-                                <a class="button is-primary w-100 shadow-lg" style="text-decoration: none;">Về trang chủ</a>
-                            </div>
-                            {% if ques.quiz.number_of_question > ques.number or next_question %}
-                            <div class="column">
-                                <a class="button is-success w-100 shadow-lg" href="{% url 'quiz_question_view' id=next_question %}" style="text-decoration: none;">Câu tiếp theo</a>
-                            </div>
-                            {% else %}
-                            <div class="column">
-                                <a class="button is-success w-100 shadow-lg" href="{% url 'quiz' %}" style="text-decoration: none;">Bạn đã làm xong! Hãy khám phá những bộ quiz khác nào</a>
-                            </div>
-                            {% endif %}
-                        </div>
+                        <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen University thêm</button>
                     </div>
                 </div>
             </div>
@@ -97,26 +83,33 @@
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <h1 class="text-center">Hỏi GPTeen</h1>
-              <p>Bạn có thể hỏi GPTeen bằng các cách sau</p>
-              <b>1. Văn bản</b>
-                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                <h1 class="text-center">GPTeen University</h1>
+                <p>Hãy để GPTeen cùng bạn tìm ra môi trường đại học phù hợp với năng lực của bạn.</p>
+                <p style="color: red;">*Lưu ý: Điểm GPTeen xử lý được là điểm thi tốt nghiệp THPTQG của bạn theo thể thức khối ba môn. Bạn có thể xét bằng dữ liệu điểm khảo sát với thể thức tương tự</p>
+              <form action="{% url 'gpteen_university' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
                   {% csrf_token %}
-                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
-                                <button type="submit" class="btn btn-success w-100">Hỏi với 10 Teen</button>
-            </form>
-            <b>2. Ảnh</b>
-            <form action="{% url 'gpteen_image' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
-                {% csrf_token %}
-                <input type="file" name="image" class="form-control w-100" style="margin-bottom: 10px;" />
-                <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
-            </form>
-            <b>3. File tài liệu</b>
-            <form action="{% url 'gpteen_document' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
-                {% csrf_token %}
-                <input type="file" name="doc" class="form-control w-100" style="margin-bottom: 10px;" />
-                <button type="submit" class="btn btn-success w-100">Hỏi với 50 Teen</button>
-            </form>
+                      <div style="margin-bottom: 10px;">
+                        <label>Tổng điểm ba môn cộng lại</label>
+                        <input type="text" name="total_score" class="form-control w-100" />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <label>Mã khối</label>
+                        <input type="text" name="category_code" class="form-control w-100" />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <label>Nghề nghiệp mong muốn</label>
+                        <input type="text" name="job" class="form-control w-100" />
+                      </div>
+                      <div style="margin-bottom: 10px;">
+                        <label>Khu vực <span style="color: red;">*</span></label>
+                            <select class="form-select" name="area">
+                              <option value="Miền Bắc">Miền Bắc</option>
+                              <option value="Miền Trung">Miền Trung</option>
+                              <option value="Miền Nam">Miền Nam</option>
+                            </select>
+                      </div>
+                  <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+              </form>
             </div>
           </div>
         </div>
