@@ -15,13 +15,12 @@
     </style>
 </head>
 <body class="background-color:white;">
-    <nav class="navbar sticky-top bg-dark text-light">
+    <nav class="navbar  bg-dark text-light">
         <div class="container">
-            <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+            <a class="navbar-brand text-center text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
           <div class="text-end justify-content-end align-items-end">
             <div class="columns">
                 <div class="column w-100">
-                    <a class="btn btn-primary btn-lg" style="width:150px;">Điểm: {{bio.balance}}</a>
                 </div>
             </div>
           </div>
@@ -33,10 +32,12 @@
                 <div style="position: sticky;position: -webkit-sticky;z-index: 1; /* Stay on top */
                 top: 0; /* Stay at the top */
                 left: 0;">
-                <a href="{% url 'question' %}" class="link-success">Quay lại</a>
+                    <a href="{% url 'question' %}" class="link-success"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                    </svg> Quay lại</a>
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
-                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
                 <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
+                 <a class="btn btn-primary btn-lg w-100" style="margin-bottom: 10px;">Điểm: {{bio.balance}}</a>
                 <b>Phần thưởng</b>
                 <br>
                 <button class="button is-large is-info is-fullwidth is-fullheight"> {{post.price}} Teen</button>
@@ -71,17 +72,22 @@
             <div class="column">
               <h1 class="title is-1 text-dark">{{post.title}}</h1>
             <div class="bg-secondary w-100 rounded" style="height: 3px; margin-top: 10px;margin-bottom: 10px;"></div>
+            <div class="columns">
+              <div class="column">
+                <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a href="{% url 'user_profile' id=post.user.id %}" class="link-dark">   {{post.user.user.username}}</a>
+              </div>
+            </div>
             <p>{{post.description|safe}}</p>
-            <h3>Phần thưởng lên đến: {{post.price}} Teen</h3> 
+            <h3>Phần thưởng lên đến: {{post.price}} Teen</h3>
             {% if post.image %}
                 <img src="{{post.image.url}}"  style="width: 1000px;height: 300px;object-fit: contain;margin-bottom: 10px;" />
             {% endif %}
             <div class="row">
                 <div class="col-lg">
-                    <a href="/like/question/{{post.id}}/" class="btn btn-primary w-100">Like</a>
+                    <a href="/like/question/{{post.id}}/" class="btn btn-primary w-100"> {{post.like.count}} Like</a>
                 </div>
                 <div class="col-lg">
-                    <a href="/dislike/question/{{post.id}}/" class="btn btn-danger w-100">Dislike</a>
+                    <a href="/dislike/question/{{post.id}}/" class="btn btn-danger w-100">{{post.dislike.count}} Dislike</a>
                 </div>
             </div>
             <div class="row" style="margin-top: 2%;">
@@ -125,6 +131,117 @@
                 </div>
         </form>
         <br>
+        {% if check %}
+        <div class="card shadow-lg" id="{{check.id}}" style="margin-bottom: 10px;">
+          <div class="card-body">
+            {% if check.image %}
+            <div class="columns">
+              <div class="column">
+                <img class="rounded" style="width: 1000px;height: 230px;object-fit: contain;" src="{{check.image.url}}" />
+              </div>
+            </div>
+          {% endif %}
+              <div class="row">
+                  <div class="col-lg align-self-start">
+                      <div class="d-flex">
+                        <h4>{{check.content}}</h4> <span class=" btn btn-primary text-light rounded" style="margin-left: 10px;">Câu trả lời được chọn</span>
+                      </div>
+                  </div>
+                  <div class="col-lg align-self-end">
+                      <div class="d-lg-flex align-items-end justify-content-end" style="margin-right: 10%;">
+                         
+                      </div>
+                  </div>
+              </div>
+              <img src="{{check.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover; margin-bottom: 10px;"> <a href="{% url 'user_profile' id=check.user.id %}" class="link-dark">   {{check.user.user.username}}</a>
+              <br>
+              <div class="row">
+                  <div class="col-lg">
+                      <a href="{% url 'like_answer' id=check.id %}" class="btn btn-primary w-100">{{check.like.count}} Like</a>
+                  </div>
+                  <div class="col-lg">
+                      <a href="{% url 'dislike_answer' id=check.id %}" class="btn btn-danger w-100">{{check.dislike.count}} Dislike</a>
+                  </div>
+              </div>
+              <div class="row" style="margin-top: 10px;">
+                  <div class="col-lg">
+                      {% if check.file %}
+                          <a href="{{answer.file}}" class="btn btn-info w-100">Tài Liệu</a>
+                      {% else %}
+                          <a class="btn disabled btn-info w-100">Tài Liệu</a>
+                      {% endif %}
+                  </div>
+              </div>
+          </div>
+      </div>
+      {% for answer in answers %}
+      {% if answer != check %}
+                    <div class="card shadow-lg" id="{{answer.id}}" style="margin-bottom: 10px;">
+                        <div class="card-body">
+                          {% if answer.image %}
+                          <div class="columns">
+                            <div class="column">
+                              <img class="rounded" style="width: 1000px;height: 230px;object-fit: contain;" src="{{answer.image.url}}" />
+                            </div>
+                          </div>
+                        {% endif %}
+                            <div class="row">
+                                <div class="col-lg align-self-start">
+                                    <div class="d-flex">
+                                      <h4>{{answer.content}}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-lg align-self-end">
+                                    <div class="d-lg-flex align-items-end justify-content-end" style="margin-right: 10%;">
+                                        
+                                        {% if answer.user == bio %}
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
+                                        <div class="modal fade" id="delete_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                          <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                              <div class="modal-header">
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                              </div>
+                                              <div class="modal-body">
+                                                  <h1>Xóa câu trả lời này?</h1>
+                                                  <p>Bạn có chắc chắn rằng sẽ xóa câu trả lời này</p>
+                                                  <div class="d-lg-flex">
+                                                    <button class="btn btn-secondary" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">Tôi cần suy nghĩ thêm</button>
+                                                    <a class="btn btn-success" href="{% url 'delete_answer' id=answer.id %}">Tôi chắc chắn</a>
+                                                  </div>
+                                              </form>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            <img src="{{answer.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover; margin-bottom: 10px;"> <a href="{% url 'user_profile' id=answer.user.id %}" class="link-dark">   {{answer.user.user.username}}</a>
+                            <br>
+                            <div class="row">
+                                <div class="col-lg">
+                                    <a href="{% url 'like_answer' id=answer.id %}" class="btn btn-primary w-100">{{answer.like.count}} Like</a>
+                                </div>
+                                <div class="col-lg">
+                                    <a href="{% url 'dislike_answer' id=answer.id %}" class="btn btn-danger w-100">{{answer.dislike.count}} Dislike</a>
+                                </div>
+                            </div>
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-lg">
+                                    {% if answer.file %}
+                                        <a href="{{answer.file}}" class="btn btn-info w-100">Tài Liệu</a>
+                                    {% else %}
+                                        <a class="btn disabled btn-info w-100">Tài Liệu</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+        {% else %}
             {% if answers %}
                 {% for answer in answers %}
                     <div class="card shadow-lg" id="{{answer.id}}" style="margin-bottom: 10px;">
@@ -132,19 +249,19 @@
                           {% if answer.image %}
                           <div class="columns">
                             <div class="column">
-                              <img class="rounded" style="width: 1000px;height: 230px;object-fit: contain;" src="{{answer.image.url}}" /> 
+                              <img class="rounded" style="width: 1000px;height: 230px;object-fit: contain;" src="{{answer.image.url}}" />
                             </div>
                           </div>
                         {% endif %}
                             <div class="row">
                                 <div class="col-lg align-self-start">
                                     <div class="d-flex">
-                                      <h4>{{answer.content}}</h4> {% if answer.choosen == 1 and answer.answered == 1 %} <span class="bg-primary text-light rounded" style="padding: 3px;">Check</span> {% else %} {% endif %}
+                                      <h4>{{answer.content}}</h4> {% if answer.choosen == 1 and post.answered == 1 %} <span class=" btn btn-primary text-light rounded" style="margin-left: 10px;">Câu trả lời được chọn</span> {% else %} {% endif %}
                                     </div>
                                 </div>
                                 <div class="col-lg align-self-end">
                                     <div class="d-lg-flex align-items-end justify-content-end" style="margin-right: 10%;">
-                                        {% if bio == answer.user or bio.user.is_staff and answer.answered == 0 %}
+                                        {% if bio == post.user or bio.user.is_staff and post.answered == 0 %}
                                             <button type="button" data-bs-toggle="modal" data-bs-target="#check_question" class="btn btn-success"><i class="bi bi-check-lg"></i></button>
                                             <div class="modal fade" id="check_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                               <div class="modal-dialog modal-dialog-centered">
@@ -191,7 +308,7 @@
                                                 </div>
                                               </div>
                                               </div>
-                                        {% elif post.user != bio and answer.user == bio %}
+                                        {% elif answer.user == bio %}
                                         <button type="button" data-bs-toggle="modal" data-bs-target="#delete_question" class="btn btn-danger"><i class="bi bi-x-lg"></i></button>
                                         <div class="modal fade" id="delete_question" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                           <div class="modal-dialog modal-dialog-centered">
@@ -215,7 +332,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover; margin-bottom: 10px;"> <a class="link-dark">   {{post.user.user.username}}</a>
+                            <img src="{{answer.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover; margin-bottom: 10px;"> <a href="{% url 'user_profile' id=answer.user.id %}" class="link-dark">   {{answer.user.user.username}}</a>
                             <br>
                             <div class="row">
                                 <div class="col-lg">
@@ -227,7 +344,7 @@
                             </div>
                             <div class="row" style="margin-top: 10px;">
                                 <div class="col-lg">
-                                    {% if post.file %}
+                                    {% if answer.file %}
                                         <a href="{{answer.file}}" class="btn btn-info w-100">Tài Liệu</a>
                                     {% else %}
                                         <a class="btn disabled btn-info w-100">Tài Liệu</a>
@@ -240,8 +357,20 @@
                 {% else %}
                 <p class="text-center">Chưa có bình luận nào</p>
             {% endif %}
-  
+          {% endif %}
+
         </div>
+              <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/0.1.0-beta.4/libs/oversea/index.js"></script>
+      <script>
+          new CozeWebSDK.WebChatClient({
+            config: {
+              bot_id: '7361736065943617544',
+            },
+            componentProps: {
+              title: 'GPTeen',
+            },
+          });
+      </script>
     </div>
     <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">

@@ -80,13 +80,13 @@
             <div class="card rounded shadow-lg" style="padding: 10%;">
                 <div class="card-body">
                    <h5 class="text-center">{{post.price}}</h5>
-                   <p class="text-center">Là số tiền bạn vừa thanh toán cho {{post.user.user.username}}</p>
+                   <p class="text-center">Là số điểm bạn vừa thanh toán cho {{post.user.user.username}}</p>
                    <p class="text-center">Thanh toán cho câu trả lời: {{post.content}}</p>
                    <p class="text-center">Tác giả câu trả lời: {{post.user.user.username}}</p>
                    <br>
                    <div class="columns w-100">
                     <div class="column w-100">
-                        <a href="{% url 'question_view' id=post.id %}" class="btn btn-outline-primary w-100">Trở về trang trước</a>
+                        <a href="{% url 'question_view' id=post.question.id %}" class="btn btn-outline-primary w-100">Trở về trang trước</a>
                     </div>
                    </div>
                 </div>

@@ -14,13 +14,12 @@
     </style>
 </head>
 <body>
-    <nav class="navbar sticky-top bg-dark text-light">
+    <nav class="navbar  bg-dark text-light">
         <div class="container">
-            <a href="/post" class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+            <a class="navbar-brand text-center text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
           <div class="text-end justify-content-end align-items-end">
             <div class="columns">
                 <div class="column w-100">
-                    <a class="btn btn-primary btn-lg" style="width:150px;">Điểm: {{bio.balance}}</a>
                 </div>
             </div>
           </div>
@@ -33,7 +32,8 @@
                 top: 0; /* Stay at the top */
                 left: 0;">
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
-                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">GPTeen University</button>
+                <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
+                 <a class="btn btn-primary btn-lg w-100" style="margin-bottom: 10px;">Điểm: {{bio.balance}}</a>
                 <b>Phân trang</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
                     <li><a href="{% url 'post' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Cộng đồng</a></li>
@@ -74,6 +74,20 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div style="padding: 30px;">
+            <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/0.1.0-beta.4/libs/oversea/index.js"></script>
+              <script>
+                  new CozeWebSDK.WebChatClient({
+                    config: {
+                      bot_id: '7361736065943617544',
+                    },
+                    componentProps: {
+                      title: 'GPTeen',
+                      layout: 'pc',
+                    },
+                  });
+              </script>
         </div>
     </div>
     <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

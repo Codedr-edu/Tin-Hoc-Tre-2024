@@ -18,7 +18,7 @@ headers = {
 
 
 def check_image(image, bot_id=bot_id, url=url, headers=headers):
-    prompt = "Hãy đọc và kiểm tra nội dung nhạy cảm nếu chúng xuất hiện trong bức ảnh trong đường link: http://localhost:8000" + \
+    prompt = "Hãy đọc và kiểm tra nội dung nhạy cảm nếu chúng xuất hiện trong bức ảnh trong đường link: https://bdt.pythonanywhere.com/" + \
         str(image)
     data = {
         "conversation_id": "123",
@@ -47,7 +47,7 @@ def check_image(image, bot_id=bot_id, url=url, headers=headers):
 
 
 def check_document(image, bot_id=bot_id, url=url, headers=headers):
-    prompt = "Hãy đọc và kiểm tra nội dung nhạy cảm nếu chúng xuất hiện trong file trong đường link sau: http://localhost:8000" + \
+    prompt = "Hãy đọc và kiểm tra nội dung nhạy cảm nếu chúng xuất hiện trong file trong đường link sau: https://bdt.pythonanywhere.com" + \
         str(image)
     data = {
         "conversation_id": "123",

@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en" style="background-color: white;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+    <style>
+      strong{
+          color: black;
+      }
+  </style>
+</head>
+<body class="background-color:white;">
+    <nav class="navbar  bg-dark text-light">
+        <div class="container">
+            <a class="navbar-brand text-center text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+          <div class="text-end justify-content-end align-items-end">
+            <div class="columns">
+                <div class="column w-100">
+                </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    <div class="container">
+        <div class="columns h-100" style="margin-top:15px;">
+            <div class="column is-one-quarter">
+                <div style="position: sticky;position: -webkit-sticky;z-index: 1; /* Stay on top */
+                top: 0; /* Stay at the top */
+                left: 0;">
+                    <a href="{% url 'club_list_view' %}" class="link-success"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+                    </svg> Quay lại</a>
+                    <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
+                <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
+                 <a class="btn btn-primary btn-lg w-100" style="margin-bottom: 10px;">Điểm: {{bio.balance}}</a>
+                <b>Đăng ký</b>
+                <br>
+                {% if post.user != bio %}
+                    {% if check %}
+                    {% else %}
+                    <button class="button is-large is-info is-fullwidth" data-bs-toggle="modal" data-bs-target="#check_code"  class="btn btn-info w-100">Đăng ký tham gia</button>
+                    {% endif %}
+                {% else %}
+                <button class="button is-large is-info is-fullwidth" data-bs-toggle="modal" data-bs-target="#apply"  class="btn btn-info w-100">Người đăng ký</button>
+                <button class="button is-large is-info is-fullwidth" data-bs-toggle="modal" data-bs-target="#member" style="margin-top: 10px;"  class="btn btn-info w-100">Thành viên chính thức</button>
+                {% endif %}
+                <br>
+                {% if bio != post.user %}
+                <b>Báo cáo bài viết</b>
+                <br>
+                <button class="button is-large is-danger is-fullwidth" href="{% url 'down_club' id=post.id %}">Báo cáo bài viết</button>
+                <br>
+                {% else %}
+                <b>Xóa bài</b>
+                <br>
+                <!--<button class="button is-large is-danger is-fullwidth" href="">Xóa bài viết</button>-->
+                <br>
+                {% endif %}
+                <b>Các vị trí</b>
+                {% if roles %}
+                <ul class="list-group list-group-flush rounded">
+                    {% for role in roles %}
+                  <li class="list-group-item">{{role.role}}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+                <br>
+                <b>Các kỹ năng</b>
+                {% if skills %}
+                <ul class="list-group list-group-flush rounded">
+                    {% for skill in skills %}
+                  <li class="list-group-item">{{skill}}</li>
+                  {% endfor %}
+                </ul>
+                {% endif %}
+                <br>
+                <b>Khác</b>
+                <ul style="padding-top: 5px;">
+                  {% if bio.user.is_staff %}
+                    <li><a href="{% url 'staff_index' %}" class="button is-success is-rounded is-fullwidth" style="text-decoration: none;">Trang Quản Trị Viên</a></li>
+                    {% endif %}
+                    <li style="margin-top: 10px;"><a href="{% url 'log_out' %}" class="button is-danger is-rounded is-fullwidth" style="text-decoration: none;">Đăng xuất</a></li>
+                    <li style="margin-top: 10px;"><a class="button is-warning is-rounded is-fullwidth" style="text-decoration: none;">Hỗ trợ & Báo cáo sự cố kỹ thuật</a></li>
+                </ul>
+                </div>
+            </div>
+            <div class="column">
+              <br>
+              <h1 class="title is-1 text-dark">{{post.name}}</h1>
+              <div class="bg-secondary w-100 rounded" style="height: 3px; margin-top: 10px;margin-bottom: 10px;"></div>
+              <div class="columns">
+                <div class="column">
+                  <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a href="{% url 'user_profile' id=post.user.id %}" class="link-dark">   {{post.user.user.username}}</a>
+                </div>
+              </div>
+              <p>{{post.description|safe}}</p>
+              {% if images %}
+              <div id="carouselExampleIndicators" class="carousel slide w-100 shadow-lg rounded" style="height: 500px;">
+                <div class="carousel-inner shadow-lg rounded">
+                    <div class="carousel-item active">
+                        <img src="{{post.club_image_related.first.image.url}}" class="d-block shadow-lg w-100 rounded" style="height: 500px;object-fit: cover;" alt="...">
+                      </div>
+                    {% for image in images %}
+                  <div class="carousel-item">
+                    <img src="{{image.image.url}}" class="d-block shadow-lg w-100 rounded" style="height: 500px;object-fit: cover;" alt="...">
+                  </div>
+                  {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+              {% endif %}
+              <br>
+              {% if post.video %}
+            <video class="w-100 rounded shadow-lg" width="320" height="240" controls>
+                <source src="{{post.video.url}}" type="video/mp4">
+              </video>
+            {% endif %}
+              <div class="row">
+                  <div class="col-lg">
+                      <a href="{% url 'like_club' id=post.id %}" class="btn btn-primary w-100">Like {{post.like.count}}</a>
+                  </div>
+                  <div class="col-lg">
+                      <a href="{% url 'dislike_club' id=post.id %}" class="btn btn-danger w-100">Dislike {{post.dislike.count}}</a>
+                  </div>
+              </div>
+              <br>
+              <div class="bg-secondary w-100 rounded" style="height: 3px;"></div>
+              <br>
+              <h2 class="text-center">Bình Luận</h2>
+              <form action="{% url 'club_comment' id=post.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                  <div class="row">
+                      <div class="col-lg align-self-center w-100">
+                          <div class="d-lg-flex w-100">
+                              <input placeholder="Bình Luận" name="content" type="text" class="form-control w-100" style="margin-right: 10px;">
+                              <button type="submit" class="btn btn-success"><i class="bi bi-send"></i></button>
+                          </div>
+                      </div>
+                  </div>
+          </form>
+          <br>
+              {% if comments %}
+                  {% for comment in comments %}
+                  <div class="card" id="{{comment.id}}">
+                      <div class="card-body">
+                       <h6>{{comment.content}}</h6>
+                       <img src="{{comment.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a href="{% url 'user_profile' id=comment.user.id %}" class="link-dark">   {{comment.user.user.username}}</a>
+                      </div>
+                   </div>
+                  {% endfor %}
+              {% endif %}
+
+        </div>
+        <div style="padding: 30px;">
+            <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/0.1.0-beta.4/libs/oversea/index.js"></script>
+              <script>
+                  new CozeWebSDK.WebChatClient({
+                    config: {
+                      bot_id: '7361736065943617544',
+                    },
+                    componentProps: {
+                      title: 'GPTeen',
+                      layout: 'pc',
+                    },
+                  });
+              </script>
+        </div>
+    </div>
+    <div class="modal fade" id="check_code" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <h1 class="text-center">Đăng ký tham gia</h1>
+              <form action="{% url 'apply_club' id=post.id %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                  <div class="row">
+                      <div class="col-lg align-self-center w-100">
+                              <label>Vị trí ứng tuyển</label>
+                              <select id="edu_rank" name="role" class="form-select" required>
+                                {% for role in roles %}
+                                    <option value="{{role.id}}">{{role.role}}</option>
+                                {% endfor %}
+                            </select>
+                               <label>Liên hệ qua</label>
+                               <input name="contact" class="form-control w-100" type="text" />
+                               <label>Mô tả bản thân</label>
+                            <textarea class="form-control" name="description" rows="5" cols="5"></textarea>
+                            <br>
+                              <button type="submit" class="btn btn-success w-100">Đăng ký tham gia</button>
+                      </div>
+                  </div>
+          </form>
+          </div>
+        </div>
+      </div>
+      </div>
+      <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">Hỏi GPTeen</h1>
+                <form action="{% url 'ask_gpteen' %}" method="post" enctype="multipart/form-data">
+                  {% csrf_token %}
+                                <textarea placeholder="Nhập câu hỏi" rows="5" cols="5" name="gpteen" class="form-control w-100" style="margin-right: 10px;margin-bottom: 10px;"></textarea>
+                                <button type="submit" class="btn btn-success w-100">Hỏi với 10 Teen</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade" id="ask_gpteen_university" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">GPTeen University</h1>
+              <p>Hãy để GPTeen cùng bạn tìm ra môi trường đại học phù hợp với năng lực của bạn.</p>
+              <p style="color: red;">*Lưu ý: Điểm GPTeen xử lý được là điểm thi tốt nghiệp THPTQG của bạn theo thể thức khối ba môn. Bạn có thể xét bằng dữ liệu điểm khảo sát với thể thức tương tự</p>
+            <form action="{% url 'gpteen_university' %}" method="post" enctype="multipart/form-data" style="margin-bottom: 10px;">
+                {% csrf_token %}
+                    <div style="margin-bottom: 10px;">
+                      <label>Tổng điểm ba môn cộng lại</label>
+                      <input type="text" name="total_score" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Mã khối</label>
+                      <input type="text" name="category_code" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Nghề nghiệp mong muốn</label>
+                      <input type="text" name="job" class="form-control w-100" />
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                      <label>Khu vực <span style="color: red;">*</span></label>
+                          <select class="form-select" name="area">
+                            <option value="Miền Bắc">Miền Bắc</option>
+                            <option value="Miền Trung">Miền Trung</option>
+                            <option value="Miền Nam">Miền Nam</option>
+                          </select>
+                    </div>
+                <button type="submit" class="btn btn-success w-100">Hỏi với 100 Teen</button>
+            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal fade w-100" id="apply" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">Những người đang đăng ký</h1>
+              <table class="table w-100 shadow " style="border-radius: 20%;background: transparent;table-layout: fixed; width: 100%;">
+                <thead>
+                    <th class="text-dark">ID</th>
+                    <th class="text-dark">Tên người dùng</th>
+                    <th class="text-dark">Vị trí ứng tuyển</th>
+                    <th class="text-dark">Thông tin liên lạc</th>
+                    <th class="text-dark">Trạng thái</th>
+                    <th class="text-dark">Xét duyệt</th>
+                </thead>
+                <tbody>
+                    {% if applies %}
+                        {% for apply in applies %}
+                            <td>{{apply.id}}</td>
+                            <td>{{apply.user.user.username}}</td>
+                            <td>{{apply.role.role}}</td>
+                            <td><p style="word-wrap: break-word;">{{apply.contact}}</p></td>
+                            <td>{{apply.status}}</td>
+                            <td><a href="{% url 'club_member_apply_accept' id=apply.id %}" class="link-success">Xét duyệt</a></td>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+            </table> 
+            </div>
+          </div>
+        </div>
+        </div>
+        <div class="modal fade" id="member" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <h1 class="text-center">Những thành viên chính thức</h1>
+                  <table class="table w-100 shadow " style="border-radius: 20%;background: transparent;">
+                    <thead>
+                        <th class="text-dark">ID</th>
+                        <th class="text-dark">Tên người dùng</th>
+                        <th class="text-dark">Vị trí</th>
+                        <th class="text-dark">Thông tin liên lạc</th>
+                        <th class="text-dark">Trạng thái</th>
+                        <th class="text-dark">Rời CLB</th>
+                    </thead>
+                    <tbody>
+                        {% if members %}
+                            {% for member in members %}
+                                <td>{{member.id}}</td>
+                                <td>{{member.user.user.username}}</td>
+                                <td>{{member.role.role}}</td>
+                                <td><p style="word-wrap: break-word;">{{member.contact}}</p></td>
+                                <td>{{member.status}}</td>
+                                <td><a href="{% url 'club_member_delete' id=member.id %}" class="link-success">Rời CLB</a></td>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table> 
+                </div>
+              </div>
+            </div>
+            </div>
+</body>
+</html>

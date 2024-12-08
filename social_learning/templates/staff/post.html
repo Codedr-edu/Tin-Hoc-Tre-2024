@@ -62,18 +62,22 @@
     </header>
     <main>
         <div class="container">
-            <a href="{% url 'staff_index' %}" class="link-success">Trang chủ</a>
+            <a href="{% url 'staff_index' %}" class="link-success"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house" viewBox="0 0 16 16">
+              <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L2 8.207V13.5A1.5 1.5 0 0 0 3.5 15h9a1.5 1.5 0 0 0 1.5-1.5V8.207l.646.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293zM13 7.207V13.5a.5.5 0 0 1-.5.5h-9a.5.5 0 0 1-.5-.5V7.207l5-5z"/>
+            </svg> Trang chủ</a>
+            <br>
+            <h1 class="text-center">Bài viết cộng đồng</h1>
             <br>
             {% if posts|length != 0 %}
                 {% for post in posts %}
                     <div class="d-flex justify-content-center shadow align-items-start w-75 vh-75 mx-auto card">
                         <div class="card-header w-100" id="{{post.id}}">
                             <div class="container">
-                                <div class="columns">
-                                  <div class="column">
-                                    <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;"> <a class="link-dark">   {{post.user.user.username}}</a>
-                                  </div>
+                              <div class="columns">
+                                <div class="column">
+                                  <img src="{{post.user.avatar.url}}" class="rounded-circle" style="width: 50px;height: 50px;object-fit: cover;"> <a href="{% url 'user_profile' id=post.user.id %}" class="link-dark">   {{post.user.user.username}}</a>
                                 </div>
+                              </div>
                             </div>
                         </div>
                         <div class="row align-self-end" style="margin-top: 10px;">
@@ -91,7 +95,7 @@
                           </div>
                         </div>
                         <div class="card-body w-100">
-                        <h6 class="card-text text-start align-items-start">{{post.content}}</h6>
+                        <h6 class="card-text text-start align-items-start">{{post.content|safe}}</h6>
                         <br>
                         <div class="columns">
                           <div class="column w-100">

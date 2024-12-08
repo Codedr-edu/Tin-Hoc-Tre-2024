@@ -41,8 +41,6 @@
                       </button>
                       <ul class="dropdown-menu">
                         <li><a href="{% url 'your_profile' %}" class="dropdown-item">Thông Tin Tài Khoản</a></li>
-                        <li><a href="{% url 'update_profile' %}" class="dropdown-item">Thay Đổi Thông Tin Tài Khoản</a></li>
-                        <li><a href="{% url 'log_out' %}" class="dropdown-item link-danger">Đăng Xuất</a></li>
                       </ul>
                     </div>
                   </li>
@@ -55,7 +53,7 @@
 
               <div class="text-end justify-content-end align-items-end">
                 <div class="d-flex">
-                    <a class="btn btn-primary">Số dư của bạn: {{teen}}</a>
+                    <a class="btn btn-primary">Số dư của bạn: {{bio.balance}}</a>
                 </div>
               </div>
             </div>
@@ -71,7 +69,12 @@
             <a class="btn btn-warning w-100" style="margin-bottom: 10px;" href="{% url 'staff_answer_list' %}">Câu trả lời: {{answer}}</a>
             <a class="btn btn-info w-100" style="margin-bottom: 10px;" href="{% url 'staff_comment_post_list' %}">Bình luận bài viết: {{comment_post}}</a>
             <a class="btn btn-dark w-100" style="margin-bottom: 10px;" href="{% url 'staff_comment_document_list' %}">Bình luận tài liệu: {{comment_document}}</a>
-            <a class="btn btn-dark w-100" style="margin-bottom: 10px;" href="{% url 'staff_honor' %}">Vinh danh: {{honor}}</a>
+            <a class="btn btn-success w-100" style="margin-bottom: 10px;" href="{% url 'staff_honor' %}">Vinh danh: {{honor}}</a>
+            <a class="btn btn-danger w-100" style="margin-bottom: 10px;" href="{% url 'staff_club_list' %}">Câu lạc bộ: {{club}}</a>
+            <a class="btn btn-warning w-100" style="margin-bottom: 10px;" href="{% url 'staff_online_class_list' %}">Lớp học online: {{online_class}}</a>
+            <a class="btn btn-info w-100" style="margin-bottom: 10px;" href="{% url 'staff_club_comment_list' %}">Bình luận CLB: {{comment_club}}</a>
+            <a class="btn btn-dark w-100" style="margin-bottom: 10px;" href="{% url 'staff_online_class_comment_list' %}">Bình luận lớp học online: {{comment_online_class}}</a>
+            <a class="btn btn-success w-100" style="margin-bottom: 10px;" href="{% url 'staff_user_unactive_list' %}">Người dùng bị khóa: {{user}}</a>
         </div>
     </div>
 </body>

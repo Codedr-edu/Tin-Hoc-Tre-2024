@@ -16,13 +16,12 @@
   </style>
 </head>
 <body>
-    <nav class="navbar sticky-top bg-dark text-light">
+    <nav class="navbar  bg-dark text-light">
         <div class="container">
-            <a class="navbar-brand text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
+            <a class="navbar-brand text-center text-lg link-light" style="font-size: 30px;padding-top:5px;padding-bottom: 5px;">BDTeen</a>
           <div class="text-end justify-content-end align-items-end">
             <div class="columns">
                 <div class="column w-100">
-                    <a class="btn btn-primary btn-lg" style="width:150px;">Điểm: {{bio.balance}}</a>
                 </div>
             </div>
           </div>
@@ -35,8 +34,8 @@
                 top: 0; /* Stay at the top */
                 left: 0;">
                     <h3 style="margin-bottom: 10px;">Xin chào! {{bio.user.username}}</h3>
-                <button class="button is-primary is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen"  class="btn btn-info w-100">Hỏi GPTeen</button>
                 <button class="button is-success is-fullwidth is-large" style="margin-bottom: 10px;" data-bs-toggle="modal" data-bs-target="#ask_gpteen_university"  class="btn btn-info w-100">GPTeen University</button>
+                 <a class="btn btn-primary btn-lg w-100" style="margin-bottom: 10px;">Điểm: {{bio.balance}}</a>
                 <b>Tìm kiếm</b>
                 <form style="margin-bottom: 10px;">
                     <div class="columns">
@@ -54,7 +53,7 @@
                     </div>
                     <div class="columns" style="margin-top: -30px;">
                         <div class="column">
-                            <button class="button is-success is-fullwidth">Search</button>
+                            <button class="button is-success is-fullwidth">Tìm Kiếm</button>
                         </div>
                     </div>
                 </form>
@@ -64,11 +63,13 @@
                     <li style="margin-top: 10px;"><a href="{% url 'question' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Hỏi đáp</a></li>
                     <li style="margin-top: 10px;"><a href="{% url 'document' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Tài liệu</a></li>
                     <li style="margin-top: 10px;"><a href="{% url 'quiz' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Quiz luyện tập</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'club_list_view' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Câu lạc bộ</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'online_class_list_view' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Lớp học online</a></li>
                 </ul>
                 <b>Về {{bio.user.username}}</b>
                 <ul style="padding-top: 5px;margin-bottom: 10px;">
                     <li><a href="{% url 'your_profile' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Trang cá nhân</a></li>
-                    <li style="margin-top: 10px;"><a class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Điểm & Vinh danh</a></li>
+                    <li style="margin-top: 10px;"><a href="{% url 'user_honor' %}" class="button is-outlined is-rounded is-fullwidth" style="text-decoration: none;">Điểm & Vinh danh</a></li>
                 </ul>
                 <b>Khác</b>
                 <ul style="padding-top: 5px;">
@@ -122,7 +123,7 @@
                         {% if post.image %}
                           <div class="columns">
                             <div class="column">
-                              <img class="rounded" style="width: 1000px;height: 230px;object-fit: contain;" src="{{post.image.url}}" /> 
+                              <img class="rounded w-100" style="object-fit: fill;" src="{{post.image.url}}" />
                             </div>
                           </div>
                         {% endif %}
@@ -135,12 +136,12 @@
                             <a href="{% url 'dislike_post' id=post.id %}" class="btn btn-danger w-100"><i class="bi bi-hand-thumbs-down"></i> {{post.dislike.count}}</a>
                           </div>
                           <div class="column w-100">
-                            <a data-bs-toggle="modal" data-bs-target="#comment" class="btn btn-secondary w-100"><i class="bi bi-chat-left-text"></i> {{post.comment_counter}}</a>
+                            <a data-bs-toggle="modal" data-bs-target="#comment_{{post.id}}" class="btn btn-secondary w-100"><i class="bi bi-chat-left-text"></i> {{post.comment_post_related.count}}</a>
                           </div>
                         </div>
                         <div class="columns">
                           <div class="column w-100">
-                            <a data-bs-toggle="modal" data-bs-target="#check_code" class="btn btn-primary w-100"><i class="bi bi-send-plus"></i> Ủng hộ bài viết</a>
+                            <a data-bs-toggle="modal" data-bs-target="#check_code_{{post.id}}" class="btn btn-primary w-100"><i class="bi bi-send-plus"></i> Ủng hộ bài viết</a>
                           </div>
                           <div class="column w-100">
                             <button class="button is-primary w-100" onclick="myFunction()"><i class="bi bi-share" style="margin-right: 5px;"></i> Chia sẻ bài viết</button>
@@ -148,7 +149,7 @@
                           <script>
                             function myFunction() {
                               // Get the text field
-                              var copyText = "http://localhost:8000/post/{{post.id}}";
+                              var copyText = "http://bdt.pythonanywhere.com/post/{{post.id}}";
 
                               // Select the text field
                               //copyText.select();
@@ -167,7 +168,7 @@
                           <p class="text-center">{{post.datetime}}</p>
                         </div>
                     </div>
-                    <div class="modal fade" id="check_code" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="check_code_{{post.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                       <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content">
                           <div class="modal-header">
@@ -197,7 +198,7 @@
                         </div>
                       </div>
                       </div>
-                      <div class="modal fade w-100" id="comment" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal fade w-100" id="comment_{{post.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                           <div class="modal-content">
                             <div class="modal-header">
@@ -212,8 +213,8 @@
                                             </div>
                             </form>
                             <div style="height: 2px;background-color: gray;width: 100%; margin-bottom: 10px;border-radius: 5px;"></div>
-                            {% if cmts|in_category:post %}
-                              {% for comment in cmts|in_category:post %}
+                            {% if post.comment_post_related.exists %}
+                              {% for comment in post.comment_post_related.all %}
                               <div class="">
                                 <div style="padding: 5px;">
                                   <div class="columns">
@@ -227,7 +228,14 @@
                                 </div>
                               </div>
                               {% endfor %}
+                              {% else %}
+                              <p class="text-center">Chưa có comment nào cả</p>
                               {% endif %}
+
+                              <!--
+                              <div id="comments-{{ post.id }}">
+
+                              </div>-->
                             </div>
                           </div>
                         </div>
@@ -240,6 +248,20 @@
                     </div>
             {% endif %}
             </div>
+        </div>
+        <div style="padding: 30px;">
+            <script src="https://sf-cdn.coze.com/obj/unpkg-va/flow-platform/chat-app-sdk/0.1.0-beta.4/libs/oversea/index.js"></script>
+              <script>
+                  new CozeWebSDK.WebChatClient({
+                    config: {
+                      bot_id: '7361736065943617544',
+                    },
+                    componentProps: {
+                      title: 'GPTeen',
+                      layout: 'pc',
+                    },
+                  });
+              </script>
         </div>
     </div>
     <div class="modal fade" id="ask_gpteen" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -342,5 +364,57 @@
           </div>
         </div>
       </div>
+      <script>
+        $(document).ready(function () {
+            // Handle toggling of each post's comment section and loading comments via AJAX
+            $('.comment-btn').click(function () {
+                const postId = $(this).data('post');
+                const commentForm = $(`#form-${postId}`);
+
+                // If the comment form is not yet visible, load the comments via AJAX
+                if (commentForm.is(':hidden')) {
+                    $.ajax({
+                        url: `/load-comments/${postId}/`,
+                        type: 'GET',
+                        success: function (response) {
+                            $(`#comments-${postId}`).html(response.html);
+                            commentForm.show();  // Show the form after loading comments
+                        },
+                        error: function (error) {
+                            alert('Error loading comments.');
+                        }
+                    });
+                } else {
+                    commentForm.toggle();  // Just toggle if already loaded
+                }
+            });
+
+            // Handle AJAX submission of the comment form for each post
+            $('form').submit(function (e) {
+                e.preventDefault();
+                const postId = $(this).data('post');
+                const formData = $(this).serialize();
+                const csrfToken = $('input[name=csrfmiddlewaretoken]').val();
+
+                $.ajax({
+                    url: `/add-comment/${postId}/`,
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function (response) {
+                        if (response.html) {
+                            $(`#comments-${postId}`).append(response.html);
+                            $(`form[data-post="${postId}"]`)[0].reset();
+                        }
+                    },
+                    error: function (error) {
+                        alert('Error submitting comment.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>

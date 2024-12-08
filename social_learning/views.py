@@ -144,22 +144,20 @@ def question_list_view(request):
             sub = request.GET.get("topic")
 
             if not search and not sub:
-                post = Question.objects.filter(
-                    grade__lte=bio.grade, education_rank=bio.edu_rank, status="Công khai").all()
+                post = Question.objects.filter(status="Công khai").all()
             elif search and sub:
                 sub = Subject.objects.filter(id=sub).first()
                 post = Question.objects.filter(
-                    Q(content__icontains=search), Q(title__icontains=search), grade__lte=bio.grade, subject=sub, education_rank=bio.edu_rank, status="Công khai").all()
+                    Q(content__icontains=search), Q(title__icontains=search), subject=sub, status="Công khai").all()
             elif search and not sub:
                 post = Question.objects.filter(
-                    Q(content__icontains=search), Q(title__icontains=search), grade__lte=bio.grade, education_rank=bio.edu_rank, status="Công khai").all()
+                    Q(content__icontains=search), Q(title__icontains=search), status="Công khai").all()
             else:
                 sub = Subject.objects.filter(id=sub).first()
                 post = Question.objects.filter(
-                    grade__lte=bio.grade, subject=sub, education_rank=bio.edu_rank, status="Công khai").all()
+                    subject=sub, status="Công khai").all()
         else:
-            post = Question.objects.filter(
-                grade__lte=bio.grade, education_rank=bio.edu_rank, status="Công khai").all()
+            post = Question.objects.filter(status="Công khai").all()
 
         context = {"posts": post[::-1], "bio": bio,
                    'subjects': subject, 'educations': edu_rank}
@@ -180,22 +178,20 @@ def document_list_view(request):
             sub = request.GET.get("topic")
 
             if not search and not sub:
-                post = Document.objects.filter(
-                    grade__lte=bio.grade, edu_rank=bio.edu_rank, status="Công khai").all()
+                post = Document.objects.filter(status="Công khai").all()
             elif search and sub:
                 sub = Subject.objects.filter(id=sub).first()
                 post = Document.objects.filter(
-                    Q(content__icontains=search), Q(title__icontains=search), grade__lte=bio.grade, subject=sub, edu_rank=bio.edu_rank, status="Công khai").all()
+                    Q(content__icontains=search), Q(title__icontains=search), subject=sub, status="Công khai").all()
             elif search and not sub:
                 post = Document.objects.filter(
-                    Q(content__icontains=search), Q(title__icontains=search), grade__lte=bio.grade, edu_rank=bio.edu_rank, status="Công khai").all()
+                    Q(content__icontains=search), Q(title__icontains=search), status="Công khai").all()
             else:
                 sub = Subject.objects.filter(id=sub).first()
                 post = Document.objects.filter(
-                    grade__lte=bio.grade, subject=sub, edu_rank=bio.edu_rank, status="Công khai").all()
+                    subject=sub, status="Công khai").all()
         else:
-            post = Document.objects.filter(
-                grade__lte=bio.grade, edu_rank=bio.edu_rank, status="Công khai").all()
+            post = Document.objects.filter(status="Công khai").all()
 
         context = {"posts": post[::-1], "bio": bio,
                    'subjects': subject, 'educations': edu_rank}
@@ -258,8 +254,13 @@ def post_create(request):
                 check_img = check_image(image=sql.image.url)
             else:
                 check_img = "Pass"
-            fail = "có nội dung nhạy cảm"
-            if check_cnt != fail or check_img != fail:
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if (check_cnt == fail or check_cnt == fail2 or check_cnt == fail3) and (check_img == fail or check_img == fail2 or check_img == fail3):
+                sql.status = "Chờ kiểm duyệt"
+                sql.save()
+            else:
                 sql.status = "Công khai"
                 sql.content = check_cnt[8:-4]
                 sql.save()
@@ -298,8 +299,13 @@ def document_create(request):
                 check_img = "Pass"
             check_title = check_content(sql.title)
             check_description = check_and_format_content(sql.description)
-            fail = "có nội dung nhạy cảm"
-            if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if (check_doc == fail or check_doc == fail3 or check_doc == fail2) and (check_img == fail or check_img == fail3 or check_img == fail2) and (check_title == fail or check_title == fail2 or check_title == fail3) and (check_description == fail or check_description == fail2 or check_description == fail3):
+                sql.status = "Chờ kiểm duyệt"
+                sql.save()
+            else:
                 sql.status = "Công khai"
                 sql.description = check_description[8:-4]
                 sql.save()
@@ -340,8 +346,13 @@ def question_create(request):
                 check_img = "Pass"
             check_title = check_content(sql.title)
             check_description = check_and_format_content(sql.description)
-            fail = "có nội dung nhạy cảm"
-            if check_doc != fail and check_img != fail and check_title != fail and check_description != fail:
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if (check_doc == fail or check_doc == fail3 or check_doc == fail2) and (check_img == fail or check_img == fail3 or check_img == fail2) and (check_title == fail or check_title == fail2 or check_title == fail3) and (check_description == fail or check_description == fail2 or check_description == fail3):
+                sql.status = "Chờ kiểm duyệt"
+                sql.save()
+            else:
                 sql.status = "Công khai"
                 sql.description = check_description[8:-4]
                 sql.save()
@@ -369,6 +380,10 @@ def question_payment(request, id):
                     bio.balance -= question.price
                     answer.user.save()
                     bio.save()
+                    question.answered = 1
+                    question.save()
+                    answer.choosen = 1
+                    answer.save()
                     if answer.user.balance >= 10**(honor_set+1):
                         content = "Bạn", answer.user.user.username, "đã đạt mức điểm", 10**(
                             honor_set+1)
@@ -403,7 +418,7 @@ def document_payment(request, id):
                     bio.save()
                     sql = have_buy_document(document=document, user=bio)
                     sql.save()
-                    if answer.user.balance >= 10**(honor_set+1):
+                    if document.user.balance >= 10**(honor_set+1):
                         content = "Bạn", document.user.user.username, "đã đạt mức điểm", 10**(
                             honor_set+1)
                         honor = hornorable(
@@ -436,7 +451,7 @@ def post_payment(request, id):
                     bio.balance -= value
                     document.user.save()
                     bio.save()
-                    if answer.user.balance >= 10**(honor_set+1):
+                    if document.user.balance >= 10**(honor_set+1):
                         content = "Bạn", document.user.user.username, "đã đạt mức điểm", 10**(
                             honor_set+1)
                         honor = hornorable(
@@ -748,10 +763,10 @@ def dislike_question(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         if bio not in post.dislike.all():
             post.dislike.add(bio)
-            return redirect("read_question", id=id)
+            return redirect("question_view", id=id)
         else:
             post.dislike.remove(bio)
-            return redirect("read_question", id=id)
+            return redirect("question_view", id=id)
     else:
         return redirect("index")
 
@@ -762,10 +777,10 @@ def dislike_answer(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         if bio not in post.dislike.all():
             post.dislike.add(bio)
-            return redirect("read_question", id=post.question.id)
+            return redirect("question_view", id=post.question.id)
         else:
             post.dislike.remove(bio)
-            return redirect("read_question", id=post.question.id)
+            return redirect("question_view", id=post.question.id)
     else:
         return redirect("index")
 
@@ -793,8 +808,9 @@ def comment_post(request, id):
 
                 check = "Công khai"
                 check_cnt = check_content(content)
-                fail = "có nội dung nhạy cảm"
-                if check_cnt == fail:
+                fail = "có nội dung nhạy cảm."
+                fail2 = "I'm sorry，but I can't assist with that request"
+                if check_cnt == fail or check_cnt == fail2:
                     check = "Chờ kiểm duyệt"
 
                 sql = Comment_Post(post=post, user=bio,
@@ -821,8 +837,9 @@ def comment_document(request, id):
 
                 check = "Công khai"
                 check_cnt = check_content(content)
-                fail = "có nội dung nhạy cảm"
-                if check_cnt == fail:
+                fail = "có nội dung nhạy cảm."
+                fail2 = "I'm sorry，but I can't assist with that request"
+                if check_cnt == fail or check_cnt == fail2:
                     check = "Chờ kiểm duyệt"
 
                 status = check
@@ -852,10 +869,21 @@ def answer(request, id):
                 sql.save()
 
                 check_cnt = check_content(content)
-                check_img = check_image(sql.image.url)
-                check_doc = check_document(sql.file.url)
-                fail = "có nội dung nhạy cảm"
-                if check_cnt != fail and check_img != fail and check_doc != fail:
+                if sql.image:
+                    check_img = check_image(image=sql.image.url)
+                else:
+                    check_img = "Pass"
+                if sql.file:
+                    check_doc = check_document(sql.image.url)
+                else:
+                    check_doc = "Pass"
+                # check_doc = check_document(sql.file.url)
+                fail = "có nội dung nhạy cảm."
+                fail2 = "I'm sorry，but I can't assist with that request"
+                if (check_cnt == fail or check_cnt == fail2) and check_img == fail and check_doc == fail:
+                    sql.status = "Chờ kiểm duyệt"
+                    sql.save()
+                else:
                     sql.status = "Công khai"
                     sql.save()
 
@@ -1065,7 +1093,10 @@ def question_view(request, id):
         noti = Answer.objects.filter(
             question=question, status="Công khai").all()
         bio = Bio.objects.filter(user=request.user).first()
-        context = {'post': question, "answers": noti, "bio": bio}
+        check = Answer.objects.filter(
+            question=question, status="Công khai", choosen=1).first()
+        context = {'post': question,
+                   "answers": noti[::-1], "bio": bio, "check": check}
     else:
         return redirect('check')
     return render(request, 'question/view.html', context)
@@ -1208,9 +1239,10 @@ def user_profile(request, id):
             post = Post.objects.filter(user=bio, status="Công khai").last()
             question = Question.objects.filter(
                 user=bio, status="Công khai").last()
+            subjects = Subject.objects.all()
 
-            context = {'user': your_bio, 'document': document,
-                       'post': post, 'question': question, 'bio': bio}
+            context = {'user': bio, 'document': document,
+                       'post': post, 'question': question, 'bio': your_bio, 'subjects': subjects}
     else:
         return redirect("index")
     return render(request, "user/user_profile.html", context)
@@ -1226,9 +1258,10 @@ def your_profile(request):
         document = Document.objects.filter(user=bio, status="Công khai").last()
         post = Post.objects.filter(user=bio, status="Công khai").last()
         question = Question.objects.filter(user=bio, status="Công khai").last()
+        subjects = Subject.objects.all()
 
         context = {'user': bio, 'document': document, 'post': post,
-                   'question': question}
+                   'question': question, 'subjects': subjects}
     else:
         return redirect("index")
     return render(request, "user/your_profile.html", context)
@@ -1305,8 +1338,16 @@ def staff_index(request):
             status="Chờ kiểm duyệt").count()
         honor = hornorable.objects.filter(status="Chờ xử lý").count()
         answer = Answer.objects.filter(status="Chờ kiểm duyệt").count()
-        context = {"post": post, "question": question, "document": document, "honor": honor,
-                   "comment_post": comment_post, "comment_document": comment_document, "answer": answer}
+        Club = club.objects.filter(status="Chờ kiểm duyệt").count()
+        comment_club = club_comment.objects.filter(
+            status="Chờ kiểm duyệt").count()
+        Online_class = online_class.objects.filter(
+            status="Chờ kiểm duyệt").count()
+        comment_online_class = online_class_comment.objects.filter(
+            status="Chờ kiểm duyệt").count()
+        user = Bio.objects.filter(user__is_active=False).count()
+        context = {"post": post, "question": question, "document": document, "honor": honor, "online_class": Online_class, "club": Club, "comment_online_class": comment_online_class, "comment_club": comment_club,
+                   "comment_post": comment_post, "comment_document": comment_document, "answer": answer, "bio": bio, "user": user}
     else:
         return redirect("check")
     return render(request, "staff/index.html", context)
@@ -1314,8 +1355,8 @@ def staff_index(request):
 
 def staff_post_list(request):
     if request.user.is_authenticated and request.user.is_staff:
-        post = Post.objects.all()
-        context = {"posts": post}
+        post = Post.objects.filter(status="Chờ kiểm duyệt").all()
+        context = {"posts": post[::-1]}
     else:
         return redirect("check")
     return render(request, "staff/post.html", context)
@@ -1360,7 +1401,7 @@ def staff_comment_document_list(request):
 def staff_answer_list(request):
     if request.user.is_authenticated and request.user.is_staff:
         post = Answer.objects.filter(status="Chờ kiểm duyệt").all()
-        context = {"comments": post}
+        context = {"answers": post}
     else:
         return redirect("check")
     return render(request, "staff/answer.html", context)
@@ -1651,7 +1692,7 @@ def down_document(request, id):
                 post.save()
                 return redirect("document")
             else:
-                return redirect("read_document", id=post.id)
+                return redirect("document_view", id=post.id)
         else:
             post.down.remove(bio)
             return redirect("document_view", id=id)
@@ -1695,7 +1736,7 @@ def down_comment_document(request, id):
                 post.save()
                 return redirect("document")
             else:
-                return redirect("read_document", id=post.id)
+                return redirect("document_view", id=post.id)
         else:
             post.down.remove(bio)
             return redirect("document_view", id=id)
@@ -1716,10 +1757,10 @@ def down_question(request, id):
                 post.save()
                 return redirect("question")
             else:
-                return redirect("read_question", id=post.id)
+                return redirect("question_view", id=post.id)
         else:
             post.down.remove(bio)
-            return redirect("read_question", id=id)
+            return redirect("question_view", id=id)
     else:
         return redirect("index")
 
@@ -1737,10 +1778,10 @@ def down_answer(request, id):
                 post.save()
                 return redirect("question")
             else:
-                return redirect("read_question", id=post.question.id)
+                return redirect("question_view", id=post.question.id)
         else:
             post.down.remove(bio)
-            return redirect("read_question", id=post.question.id)
+            return redirect("question_view", id=post.question.id)
     else:
         return redirect("index")
 
@@ -1751,56 +1792,65 @@ def download_document_file(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         document = Document.objects.filter(id=id).first()
+        name = document.file.url.split("/")
         if document.price >= 1:
             check = have_buy_document.objects.filter(
                 document=document, user=bio).first()
             if bio and check:
                 response = HttpResponse(document.file)
                 response['Content-Type'] = 'application/force-download'
-                response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+                response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
+                return response
+            elif bio == document.user:
+                response = HttpResponse(document.file)
+                response['Content-Type'] = 'application/force-download'
+                response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
                 return response
         else:
             response = HttpResponse(document.file)
             response['Content-Type'] = 'application/force-download'
-            response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
             return response
-        return redirect("document_view", id=id)
+        # return redirect("document_view", id=id)
 
 
 def download_question_file(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         document = Question.objects.filter(id=id).first()
+        name = document.file.url.split("/")
         if bio and document:
             response = HttpResponse(document.file)
             response['Content-Type'] = 'application/force-download'
-            response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
             return response
-        return redirect("question_view", id=id)
+        # return redirect("question_view", id=id)
 
 
 def staff_download_document_file(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         document = Document.objects.filter(id=id).first()
+        name = document.file.url.split("/")
         if bio and document:
             response = HttpResponse(document.file)
             response['Content-Type'] = 'application/force-download'
-            response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
             return response
-        return redirect("staff_document_view", id=id)
+        # return redirect("staff_document_view", id=id)
 
 
 def download_answer_file(request, id):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         document = Answer.objects.filter(id=id).first()
+        name = document.file.url.split("/")
         if bio and document:
             response = HttpResponse(document.file)
             response['Content-Type'] = 'application/force-download'
-            response['Content-Disposition'] = f'attachment; filename="{document.file.name}"'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
             return response
-        return redirect("question_view", id=document.question.id)
+        # return redirect("question_view", id=document.question.id)
 
 # bill
 
@@ -1963,7 +2013,7 @@ def user_honor(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         honor = hornorable.objects.filter(user=bio).all()
-        context = {"bio": bio, "honor": honor[::-1]}
+        context = {"bio": bio, "posts": honor[::-1]}
     else:
         return redirect("index")
     return render(request, "user/honor.html", context)
@@ -1995,6 +2045,7 @@ def make_quiz(request):
     if request.user.is_authenticated and request.user.is_staff:
         subject = Subject.objects.all()
         edu_rank = Education_rank.objects.all()
+        bio = Bio.objects.filter(user=request.user).first()
         if request.method == "POST":
             title = request.POST.get("title")
             description = request.POST.get("description")
@@ -2013,7 +2064,7 @@ def make_quiz(request):
             return redirect("make_question", quiz_id=sql.id, ques_no=1)
     else:
         return redirect("index")
-    return render(request, "quiz/create.html", context={"subjects": subject, "edu_ranks": edu_rank})
+    return render(request, "quiz/create.html", context={"subjects": subject, "edu_ranks": edu_rank, "bio": bio})
 
 
 def make_question(request, quiz_id, ques_no):
@@ -2046,7 +2097,7 @@ def make_question(request, quiz_id, ques_no):
             return redirect("all_error")
     else:
         return redirect("index")
-    return render(request, "quiz/question/create.html")
+    return render(request, "quiz/question/create.html", context={"bio": bio})
 
 
 def edit_question(request, quiz_id, ques_no):
@@ -2079,7 +2130,7 @@ def edit_question(request, quiz_id, ques_no):
             return redirect("all_error")
     else:
         return redirect("index")
-    return render(request, "quiz/question/create.html")
+    return render(request, "quiz/question/create.html", context={"bio": bio})
 
 
 def delete_quiz(request, id):
@@ -2108,7 +2159,7 @@ def quiz_list(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         quiz = Quiz.objects.all()
-        context = {"bio": bio, "posts": quiz}
+        context = {"bio": bio, "posts": quiz[::-1]}
     else:
         return redirect("index")
     return render(request, "quiz/list.html", context=context)
@@ -2125,11 +2176,23 @@ def quiz_view(request, id):
     return render(request, "quiz/view.html", context)
 
 
-def quiz_question_view(request, id):
+def quiz_question_view(request, id, num):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
-        ques = Quiz_questions.objects.filter(id=id).first()
-        context = {"bio": bio, "question": ques}
+        quiz = Quiz.objects.filter(id=id).first()
+        ques = Quiz_questions.objects.filter(number=num, quiz=quiz).first()
+        check = Quiz_questions.objects.filter(number=num+1, quiz=quiz).first()
+        check2 = Quiz_questions.objects.filter(number=num-1, quiz=quiz).first()
+        if check:
+            next_number = check.number
+        else:
+            next_number = False
+        if check2:
+            previous_number = check2.number
+        else:
+            previous_number = False
+        context = {"bio": bio, "question": ques,
+                   "previous": previous_number, "next": next_number}
         if request.method == "POST":
             answer = request.POST.get("answer")
             check = "Sai"
@@ -2139,7 +2202,7 @@ def quiz_question_view(request, id):
                 plus = random.randint(1, 100)
                 bio.balance += plus
                 bio.save()
-            return redirect("quiz_question_after_view", status=check, point=plus, id=id)
+            return redirect("quiz_question_after_view", status=check, point=plus, id=ques.id)
     else:
         return redirect("index")
     return render(request, "quiz/question/view.html", context=context)
@@ -2153,7 +2216,7 @@ def quiz_question_after_view(request, status, point, id):
             number=ques.number+1, quiz=ques.quiz).first()
         if next_ques:
             context = {"bio": bio, "status": status,
-                       "point": point, "next_question": next_ques.id, "ques": ques}
+                       "point": point, "next_question": next_ques, "ques": ques}
         else:
             context = {"bio": bio, "status": status,
                        "point": point, "next_question": False, "ques": ques}
@@ -2166,7 +2229,7 @@ def GPTeen_image(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         if request.method == "POST":
-            image = request.POST.get("image")
+            image = request.FILES.get("image")
             sql = GPTeen_doc(image=image)
             sql.save()
             return redirect("gpteen_image_result", id=sql.id)
@@ -2179,22 +2242,23 @@ def GPTeen_image_result(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         gpteen_image = GPTeen_doc.objects.filter(id=id).first()
         if bio and gpteen_image.image:
-            result = search_image(url=gpteen_image.image.url)
+            result = search_image(image=gpteen_image.image.url)
+            # result = "Hãy đọc và trả lời câu hỏi trong bức ảnh trong đường link: https://bdt.pythonanywhere.com" + str(gpteen_image.image.url)
             bio.balance -= 50
             bio.save()
-            context = {"bio": bio, "result": result[8:-4]}
+            context = {"bio": bio, "result": result}
         else:
             return redirect("check")
     else:
         return redirect("check")
-    return render(request, "gpteen/image/result.html", context=context)
+    return render(request, "GPTeen/image/result.html", context=context)
 
 
 def GPTeen_document(request):
     if request.user.is_authenticated:
         bio = Bio.objects.filter(user=request.user).first()
         if request.method == "POST":
-            doc = request.POST.get("doc")
+            doc = request.FILES.get("doc")
             sql = GPTeen_doc(doc=doc)
             sql.save()
             return redirect("gpteen_document_result", id=sql.id)
@@ -2207,7 +2271,7 @@ def GPTeen_document_result(request, id):
         bio = Bio.objects.filter(user=request.user).first()
         gpteen_doc = GPTeen_doc.objects.filter(id=id).first()
         if bio and gpteen_doc.doc:
-            result = search_document(url=gpteen_doc.doc.url)
+            result = search_document(image=gpteen_doc.doc.url)
             bio.balance -= 50
             bio.save()
             context = {"bio": bio, "result": result[8:-4]}
@@ -2215,7 +2279,7 @@ def GPTeen_document_result(request, id):
             return redirect("check")
     else:
         return redirect("check")
-    return render(request, "gpteen/document/result.html", context=context)
+    return render(request, "GPTeen/document/result.html", context=context)
 
 
 def GPTeen_university(request):
@@ -2245,4 +2309,823 @@ def GPTeen_university_result(request, score, category_code, job, area):
             return redirect("check")
     else:
         return redirect("check")
-    return render(request, "gpteen/university/result.html", context=context)
+    return render(request, "GPTeen/university/result.html", context=context)
+
+
+def club_create(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        subjects = Subject.objects.all()
+        context = {"subjects": subjects, "bio": bio}
+        if request.method == "POST":
+            name = request.POST.get("name")
+            description = request.POST.get("description")
+            images = request.FILES.getlist("images")
+            video = request.FILES.get("video")
+            skills = request.POST.get("skills")
+            subject = request.POST.get("subject")
+            roles = request.POST.get("roles").split(',')
+            user_role = request.POST.get("user_role")
+
+            subject = Subject.objects.filter(id=subject).first()
+
+            sql = club(name=name, description=description, status="Chờ kiểm duyệt",
+                       video=video, skill=skills, user=bio, subject=subject)
+            sql.save()
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            check0 = False
+            for image in images:
+                sql1 = club_image(club=sql, image=image)
+                sql1.save()
+                check_img = sql1.image.url
+                # if check_img == fail or check_img == fail2 or check_img == fail3:
+
+            for role in roles:
+                sql1 = club_role(club=sql, role=role)
+                sql1.save()
+            role = club_role.objects.filter(club=sql, role=user_role).first()
+            sql1 = club_member(club=sql, role=role,
+                               user=bio, status="Đã xác nhận")
+            sql1.save()
+            check = check_and_format_content(description)
+            if (check == fail or check == fail2):
+                sql.status = "Chờ kiểm duyệt"
+                sql.save()
+            else:
+                # sql.status = "Công khai"
+                sql.content = check[8:-4]
+                sql.save()
+    else:
+        return redirect("check")
+    return render(request, "club/create.html", context=context)
+
+
+def staff_club_list(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        clubs = club.objects.filter(status="Chờ kiểm duyệt").all()
+        context = {"bio": bio, "questions": clubs[::-1]}
+    else:
+        return redirect("check")
+    return render(request, "staff/club/list.html", context=context)
+
+
+def staff_club_view(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        Club = club.objects.filter(id=id).first()
+        Club_role = club_role.objects.filter(club=Club).all()
+        Club_image = club_image.objects.filter(club=Club).all()
+        one_image = Club_image[0]
+        context = {"bio": bio, "post": Club, "first_img": one_image,
+                   "images": Club_image, "roles": Club_role}
+    else:
+        return redirect("check")
+    return render(request, "staff/club/view.html", context=context)
+
+
+def staff_club_check(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        Club = club.objects.filter(id=id).first()
+        if Club.status == "Chờ kiểm duyệt":
+            Club.status = "Công khai"
+        else:
+            Club.status = "Chờ kiểm duyêt"
+        Club.save()
+        return redirect("success", status=Club.status)
+    else:
+        return redirect("check")
+
+
+def staff_delete_club(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        post = club.objects.filter(id=id).first()
+        total = club.objects.count()
+        percent = total * 20 / 100
+        bio = Bio.objects.filter(user=post.user.user).first()
+        if bio.deleted <= percent:
+            bio.user.is_active = False
+            bio.user.save()
+
+        post.delete()
+
+        bio.deleted += 1
+        bio.save()
+        return redirect("staff_club_list")
+    else:
+        return redirect("check")
+
+
+def club_list_view(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        subjects = Subject.objects.all()
+        if request.method == "GET":
+            search = request.GET.get("search")
+            topic = request.GET.get("topic")
+            if topic and not search:
+                s2 = Subject.objects.filter(id=topic).first()
+                Club = club.objects.filter(
+                    subject=s2, status="Công khai").all()
+            elif search and not topic:
+                Club = club.objects.filter(
+                    Q(name__icontains=search), Q(description__icontains=search), status="Công khai").all()
+            elif search and topic:
+                s2 = Subject.objects.filter(id=topic).first()
+                Club = club.objects.filter(
+                    Q(name__icontains=search), Q(description__icontains=search), subject=s2, status="Công khai").all()
+            else:
+                Club = club.objects.filter(status="Công khai").all()
+        context = {"bio": bio, "posts": Club[::-1], "subjects": subjects}
+    else:
+        return redirect("check")
+    return render(request, "club/list.html", context=context)
+
+
+def club_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Club = club.objects.filter(id=id, status="Công khai").first()
+        Club_member = club_member.objects.filter(
+            club=Club, status="Công khai").all()
+        Club_apply = club_member.objects.filter(
+            club=Club, status="Chờ kiểm duyệt").all()
+        Club_role = club_role.objects.filter(club=Club).all()
+        Club_comment = club_comment.objects.filter(club=Club).all()
+        skills = Club.skill.split(',')
+        Club_images = club_image.objects.filter(club=Club).all()
+        check = club_member.objects.filter(user=bio).first()
+        context = {"bio": bio, "post": Club, "comments": Club_comment[::-1], "skills": skills, "images": Club_images,
+                   "members": Club_member, "roles": Club_role, "applies": Club_apply, "check": check}
+    else:
+        return redirect("check")
+    return render(request, "club/view.html", context=context)
+
+
+def staff_club_comment_list(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        comments = club_comment.objects.filter(status="Chờ kiểm duyệt").all()
+        context = {"bio": bio, "comments": comments}
+    else:
+        return redirect("check")
+    return render(request, "staff/club/comment/list.html", context=context)
+
+
+def staff_club_comment_check(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        comment = club_comment.objects.filter(id=id).first()
+        if comment.status == "Chờ kiểm duyệt":
+            comment.status = "Công khai"
+            comment.save()
+        else:
+            comment.status = "Chờ kiểm duyệt"
+            comment.save()
+        return redirect("staff_club_comment_list")
+
+
+def staff_delete_club_comment(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        post = club_comment.objects.filter(id=id).first()
+        total = club_comment.objects.count()
+        percent = total * 20 / 100
+        bio = Bio.objects.filter(user=post.user.user).first()
+        if bio.deleted <= percent:
+            bio.user.is_active = False
+            bio.user.save()
+
+        post.delete()
+
+        bio.deleted += 1
+        bio.save()
+        return redirect("staff_club_comment_list")
+    else:
+        return redirect("check")
+
+
+def apply_club(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Club = club.objects.filter(id=id).first()
+        if request.method == "POST":
+            role = request.POST.get("role")
+            description = request.POST.get("description")
+            contact = request.POST.get("contact")
+
+            member = club_member.objects.filter(user=bio, club=Club).all()
+            role = club_role.objects.filter(id=role).first()
+            if member:
+                return redirect("club_view", id=id)
+            else:
+                sql = club_member(user=bio, club=Club, role=role, description=description,
+                                  contact=contact, status="Chờ kiểm duyệt")
+                sql.save()
+                return redirect("success", status="Chờ kiểm duyệt")
+    else:
+        return redirect("check")
+
+
+def club_member_apply_accept(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        applies = club_member.objects.filter(id=id).first()
+        if applies.club.user == bio:
+            applies.status = "Công khai"
+            applies.save()
+        return redirect("club_view", id=applies.club.id)
+    else:
+        return redirect("check")
+
+
+def club_member_delete(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        applies = club_member.objects.filter(id=id).first()
+        if applies.club.user == bio:
+            applies.delete()
+        return redirect("club_view", id=applies.club.id)
+    else:
+        return redirect("check")
+
+
+def club_comment_create(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Club = club.objects.filter(id=id).first()
+        if request.method == "POST":
+            content = request.POST.get("content")
+            check = "Công khai"
+            check_cnt = check_content(content)
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if check_cnt == fail or check_cnt == fail2 or check_cnt == fail3:
+                check = "Chờ kiểm duyệt"
+
+            sql = club_comment(club=Club, user=bio,
+                               content=content, status=check)
+            sql.save()
+
+            return redirect("success", status=check)
+    else:
+        return redirect("check")
+
+
+def online_class_create(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        subjects = Subject.objects.all()
+        Edu_rank = Education_rank.objects.all()
+        context = {"bio": bio, "subjects": subjects, "edu_ranks": Edu_rank}
+        if request.method == "POST":
+            title = request.POST.get("title")
+            description = request.POST.get("description")
+            price = request.POST.get("price")
+            image = request.FILES.get("image")
+            subject = request.POST.get("subject")
+            platform = request.POST.get("platform")
+            link = request.POST.get("link")
+            education_rank = request.POST.get("edu_rank")
+            grade = request.POST.get("grade")
+
+            subject = Subject.objects.filter(id=subject).first()
+            c = Education_rank.objects.filter(
+                id=education_rank).first()
+
+            sql = online_class(title=title, description=description, price=price, image=image, grade=grade, online_class_edu_rank=c,
+                               subject=subject, platform=platform, link=link, user=bio, status="Chờ kiểm duyệt")
+            sql.save()
+            if sql.image:
+                check_img = check_image(image=sql.image.url)
+            else:
+                check_img = "Pass"
+            check_title = check_content(sql.title)
+            check_description = check_and_format_content(sql.description)
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if (check_img == fail or check_img == fail2 or check_img == fail3) and (check_title == fail or check_title == fail2 or check_title == fail3) and (check_description == fail or check_description == fail2 or check_description == fail3):
+                sql.status = "Chờ kiểm duyệt"
+                sql.save()
+            else:
+                sql.status = "Công khai"
+                sql.description = check_description
+                sql.save()
+            return redirect("homework_create", id=sql.id)
+    else:
+        return redirect("check")
+    return render(request, "online_class/create.html", context=context)
+
+
+def homework_create(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Online_class = online_class.objects.filter(id=id).first()
+        context = {"bio": bio, "online_class": Online_class}
+        if Online_class.user == bio:
+            if request.method == "POST":
+                title = request.POST.get("title")
+                content = request.POST.get("content")
+                file = request.FILES.get("file")
+
+                sql = homework_online_class(
+                    online_class=Online_class, title=title, content=content, file=file)
+                sql.save()
+                if sql.file:
+                    check_doc = check_document(image=sql.file.url)
+                else:
+                    check_doc = "None"
+                check_title = check_content(sql.title)
+                check_description = check_and_format_content(sql.content)
+                fail = "có nội dung nhạy cảm."
+                fail3 = "Có nội dung nhạy cảm."
+                fail2 = "I'm sorry，but I can't assist with that request"
+                if (check_doc == fail or check_doc == fail2 or check_doc == fail3) and (check_title == fail or check_title == fail2 or check_title == fail3) and (check_description == fail or check_description == fail2 or check_description == fail3):
+                    Online_class.status = "Chờ kiểm duyệt"
+                    Online_class.save()
+                else:
+                    sql.content = check_description[8:-4]
+                    sql.save()
+                return redirect("success", status=online_class.status)
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+    return render(request, "online_class/homework/create.html", context=context)
+
+
+def staff_online_class_list(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        clubs = online_class.objects.filter(status="Chờ kiểm duyệt").all()
+        context = {"bio": bio, "questions": clubs[::-1]}
+    else:
+        return redirect("check")
+    return render(request, "staff/online_class/list.html", context=context)
+
+
+def staff_online_class_view(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        club = online_class.objects.filter(id=id).first()
+        homework = homework_online_class.objects.filter(
+            online_class=club).first()
+        context = {"bio": bio, "post": club, "homework": homework}
+    else:
+        return redirect("check")
+    return render(request, "staff/online_class/view.html", context=context)
+
+
+def staff_online_class_check(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        club = online_class.objects.filter(id=id).first()
+        if club.status == "Chờ kiểm duyệt":
+            club.status = "Công khai"
+        else:
+            club.status = "Chờ kiểm duyêt"
+        club.save()
+    else:
+        return redirect("check")
+
+
+def staff_delete_online_class(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        post = online_class.objects.filter(id=id).first()
+        total = online_class.objects.count()
+        percent = total * 20 / 100
+        bio = Bio.objects.filter(user=post.user.user).first()
+        if bio.deleted <= percent:
+            bio.user.is_active = False
+            bio.user.save()
+
+        post.delete()
+
+        bio.deleted += 1
+        bio.save()
+        return redirect("staff_online_class_list")
+    else:
+        return redirect("check")
+
+
+def online_class_list_view(request):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        subjects = Subject.objects.all()
+        if request.method == "GET":
+            search = request.GET.get("search")
+            topic = request.GET.get("topic")
+            if topic and not search:
+                s2 = Subject.objects.filter(id=topic).first()
+                Online_class = online_class.objects.filter(
+                    subject=s2, status="Công khai").all()
+            elif search and not topic:
+                Online_class = online_class.objects.filter(
+                    Q(name__icontains=search), Q(description__icontains=search), status="Công khai").all()
+            elif search and topic:
+                s2 = Subject.objects.filter(id=topic).first()
+                Online_class = online_class.objects.filter(
+                    Q(name__icontains=search), Q(description__icontains=search), subject=s2, status="Công khai").all()
+            else:
+                Online_class = online_class.objects.filter(
+                    status="Công khai").all()
+        context = {"bio": bio,
+                   "posts": Online_class[::-1], "subjects": subjects}
+    else:
+        return redirect("check")
+    return render(request, "online_class/list.html", context=context)
+
+
+def online_class_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Online_class = online_class.objects.filter(id=id).first()
+        online_class_homework = homework_online_class.objects.filter(
+            online_class=Online_class).first()
+        check = online_class_buyer.objects.filter(
+            online_class=Online_class, user=bio).first()
+        Online_class_comment = online_class_comment.objects.filter(
+            online_class=Online_class, status="Công khai").all()
+        check2 = online_class_homework_submit.objects.filter(
+            homework=online_class_homework).first()
+        print(Online_class_comment)
+        context = {"bio": bio, "post": Online_class, "comments": Online_class_comment[::-1],
+                   "homework": online_class_homework, "check": check, "check_homework": check2}
+    else:
+        return redirect("check")
+    return render(request, "online_class/view.html", context=context)
+
+
+def staff_online_class_comment_list(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        comments = online_class_comment.objects.filter(
+            status="Chờ kiểm duyệt").all()
+        context = {"bio": bio, "comments": comments}
+    else:
+        return redirect("check")
+    return render(request, "staff/online_class/comment/list.html", context=context)
+
+
+def staff_online_class_comment_check(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        bio = Bio.objects.filter(user=request.user).first()
+        comment = online_class_comment.objects.filter(id=id).first()
+        if comment.status == "Chờ kiểm duyệt":
+            comment.status = "Công khai"
+            comment.save()
+        else:
+            comment.status = "Chờ kiểm duyệt"
+            comment.save()
+        return redirect("staff_online_class_comment_list")
+
+
+def staff_delete_online_class_comment(request, id):
+    if request.user.is_authenticated and request.user.is_staff:
+        post = online_class_comment.objects.filter(id=id).first()
+        total = online_class_comment.objects.count()
+        percent = total * 20 / 100
+        bio = Bio.objects.filter(user=post.user.user).first()
+        if bio.deleted <= percent:
+            bio.user.is_active = False
+            bio.user.save()
+
+        post.delete()
+
+        bio.deleted += 1
+        bio.save()
+        return redirect("staff_online_class_comment_list")
+    else:
+        return redirect("check")
+
+
+def apply_online_class(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Online_class = online_class.objects.filter(id=id).first()
+        if request.method == "POST":
+            code = request.POST.get("password")
+
+            member = online_class_buyer.objects.filter(
+                user=bio, online_class=Online_class).all()
+            final = hashed(code)
+            if final != "ValueError: The passcode just contain only number from 0 to 9":
+                bio = Bio.objects.filter(
+                    wallet_passcode=final, user=request.user).first()
+                honor_set = hornorable.objects.filter(
+                    user=Online_class.user).count()
+                if final == bio.wallet_passcode and bio.balance >= Online_class.price:
+                    Online_class.user.balance += Online_class.price
+                    bio.balance -= Online_class.price
+                    # answer.user.save()
+                    bio.save()
+                    if Online_class.user.balance >= 10**(honor_set+1):
+                        content = "Bạn", Online_class.user.user.username, "đã đạt mức điểm", 10**(
+                            honor_set+1)
+                        honor = hornorable(
+                            goal=10**(honor_set+1), content=content, user=Online_class.user, status="Chờ xử lý")
+                        honor.save()
+                    sql = online_class_buyer(
+                        user=bio, online_class=Online_class)
+                    sql.save()
+                    return redirect("online_class_bill", id=sql.id)
+                else:
+                    return redirect("all_error")
+            else:
+                return redirect("all_error")
+    else:
+        return redirect("check")
+
+
+def homework_submit(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        homework = homework_online_class.objects.filter(id=id).first()
+        if bio and homework:
+            file = request.FILES.get("file")
+
+            sql = online_class_homework_submit(
+                file=file, homework=homework, user=bio)
+            sql.save()
+
+            return redirect("success", status="Chờ kiểm duyệt")
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+
+
+def homework_view(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        hw = homework_online_class.objects.filter(id=id).first()
+        homework = online_class_homework_submit.objects.filter(
+            homework=hw).all()
+        context = {"bio": bio, "posts": homework, "hw": hw}
+        if hw.online_class.user != bio:
+            return redirect("online_class_view", id=hw.online_class.id)
+    else:
+        return redirect("check")
+    return render(request, "online_class/homework/view.html", context=context)
+
+
+def homework_review(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        homework = online_class_homework_submit.objects.filter(id=id).first()
+        if homework.homework.online_class.user == bio:
+            if request.method == "POST":
+                content = request.POST.get("content")
+
+                homework.teacher_review = content
+                homework.save()
+                return redirect("homework_view", id=homework.homework.id)
+        else:
+            return redirect("check")
+    else:
+        return redirect("check")
+
+
+def online_class_comment_create(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        Online_class = online_class.objects.filter(id=id).first()
+        if request.method == "POST":
+            content = request.POST.get("content")
+            check = "Công khai"
+            check_cnt = check_content(content)
+            fail = "có nội dung nhạy cảm."
+            fail3 = "Có nội dung nhạy cảm."
+            fail2 = "I'm sorry，but I can't assist with that request"
+            if check_cnt == fail or check_cnt == fail2 or check_cnt == fail3:
+                check = "Chờ kiểm duyệt"
+
+            sql = online_class_comment(online_class=Online_class, user=bio,
+                                       content=content, status=check)
+            sql.save()
+
+            return redirect("success", status=check)
+    else:
+        return redirect("check")
+
+
+def online_class_bill(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        bill = online_class_buyer.objects.filter(id=id).first()
+        if bio and bill:
+            context = {"bio": bio, "bill": bill}
+    else:
+        return redirect("check")
+    return render(request, "online_class/bill.html")
+
+
+def like_online_class(request, id):
+    if request.user.is_authenticated:
+        post = online_class.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        if not bio in post.like.all():
+            post.like.add(bio)
+            return redirect("online_class_view", id=id)
+        else:
+            post.like.remove(bio)
+            return redirect("online_class_view", id=id)
+    else:
+        return redirect("index")
+
+
+def like_club(request, id):
+    if request.user.is_authenticated:
+        post = club.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        if not bio in post.like.all():
+            post.like.add(bio)
+            return redirect("club_view", id=id)
+        else:
+            post.like.remove(bio)
+            return redirect("club_view", id=id)
+    else:
+        return redirect("index")
+
+
+def dislike_online_class(request, id):
+    if request.user.is_authenticated:
+        post = online_class.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        if bio not in post.dislike.all():
+            post.dislike.add(bio)
+            return redirect("online_class_view", id=id)
+        else:
+            post.dislike.remove(bio)
+            return redirect("online_class_view", id=id)
+    else:
+        return redirect("index")
+
+
+def dislike_club(request, id):
+    if request.user.is_authenticated:
+        post = club.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        if bio not in post.dislike.all():
+            post.dislike.add(bio)
+            return redirect("club_view", id=id)
+        else:
+            post.dislike.remove(bio)
+            return redirect("club_view", id=id)
+    else:
+        return redirect("index")
+
+
+def down_online_class(request, id):
+    if request.user.is_authenticated:
+        post = online_class.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        total = Bio.objects.count()
+        if bio not in post.down.all():
+            post.down.add(bio)
+            percent = total * 20 / 100
+            if percent <= post.down.count():
+                post.status = "Chờ kiểm duyệt"
+                post.save()
+                return redirect("document")
+            else:
+                return redirect("read_document", id=post.id)
+        else:
+            post.down.remove(bio)
+            return redirect("document_view", id=id)
+    else:
+        return redirect("index")
+
+
+def down_club(request, id):
+    if request.user.is_authenticated:
+        post = club.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        total = Bio.objects.count()
+        if bio not in post.down.all():
+            post.down.add(bio)
+            percent = total * 20 / 100
+            if percent <= post.down.count():
+                post.status = "Chờ kiểm duyệt"
+                post.save()
+                return redirect("document")
+            else:
+                return redirect("read_document", id=post.id)
+        else:
+            post.down.remove(bio)
+            return redirect("document_view", id=id)
+    else:
+        return redirect("index")
+
+
+def down_comment_online_class(request, id):
+    if request.user.is_authenticated:
+        post = online_class_comment.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        total = Bio.objects.count()
+        if bio not in post.down.all():
+            post.down.add(bio)
+            percent = total * 20 / 100
+            if percent <= post.down.count():
+                post.status = "Chờ kiểm duyệt"
+                post.save()
+                return redirect("document")
+            else:
+                return redirect("online_class_view", id=post.id)
+        else:
+            post.down.remove(bio)
+            return redirect("document_view", id=id)
+    else:
+        return redirect("index")
+
+
+def down_comment_club(request, id):
+    if request.user.is_authenticated:
+        post = club_comment.objects.filter(id=id).first()
+        bio = Bio.objects.filter(user=request.user).first()
+        total = Bio.objects.count()
+        if bio not in post.down.all():
+            post.down.add(bio)
+            percent = total * 20 / 100
+            if percent <= post.down.count():
+                post.status = "Chờ kiểm duyệt"
+                post.save()
+                return redirect("document")
+            else:
+                return redirect("club_view", id=post.id)
+        else:
+            post.down.remove(bio)
+            return redirect("club_view", id=id)
+    else:
+        return redirect("index")
+
+
+def staff_download_homework_file(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        document = homework_online_class.objects.filter(id=id).first()
+        if bio and document:
+            name = document.file.url.split("/")
+            response = HttpResponse(document.file)
+            response['Content-Type'] = 'application/force-download'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
+            return response
+        return redirect("staff_document_view", id=id)
+
+
+def download_homework_file(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        document = homework_online_class.objects.filter(id=id).first()
+        if document.online_class.price >= 1:
+            check = online_class_buyer.objects.filter(
+                online_class=document.online_class, user=bio).first()
+            if (bio and check) or bio == document.online_class.user:
+                name = document.file.url.split("/")
+                response = HttpResponse(document.file)
+                response['Content-Type'] = 'application/force-download'
+                response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
+                return response
+        else:
+            name = document.file.url.split("/")
+            response = HttpResponse(document.file)
+            response['Content-Type'] = 'application/force-download'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
+            return response
+        # return redirect("online_class_view", id=id)
+
+
+def download_done_homework_file(request, id):
+    if request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        document = online_class_homework_submit.objects.filter(id=id).first()
+        if bio == document.homework.online_class.user:
+            name = document.file.url.split("/")
+            response = HttpResponse(document.file)
+            response['Content-Type'] = 'application/force-download'
+            response['Content-Disposition'] = f'attachment; filename="{name[-1]}"'
+            return response
+        # return redirect("homework_view", id=document.homework.id)
+
+
+def staff_user_unactive_list(request):
+    if request.user.is_staff and request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        unactive_user = Bio.objects.filter(user__is_active=False).all()
+        context = {"bio": bio, "posts": unactive_user}
+    else:
+        return redirect("check")
+    return render(request, "staff/user/list.html", context=context)
+
+
+def staff_user_unactive_check(request, id):
+    if request.user.is_staff and request.user.is_authenticated:
+        bio = Bio.objects.filter(user=request.user).first()
+        user = Bio.objects.filter(id=id).first()
+        user.user.is_active = True
+        user.user.save()
+        return redirect("staff_user_unactive_list")
+    else:
+        return redirect("check")
